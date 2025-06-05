@@ -19,6 +19,7 @@ import BlockchainVerification from "@/pages/blockchain-verification";
 import AdminSettings from "@/pages/admin-settings";
 import OEMManagement from "@/pages/oem-management";
 import TenderCreation from "@/pages/tender-creation";
+import TenderResult from "@/pages/tender-result";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +44,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/finance-dashboard" component={FinanceDashboard} />
       <Route path="/tenders" component={Tenders} />
-      <Route path="/tender-result" component={NotFound} />
+      <Route path="/tender-result" component={TenderResult} />
       <Route path="/analytics" component={Reports} />
       <Route path="/tasks" component={TaskManagement} />
       <Route path="/finance" component={FinanceDashboard} />
