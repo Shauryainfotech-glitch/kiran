@@ -385,7 +385,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTender(id: number): Promise<boolean> {
     const result = await db.delete(tenders).where(eq(tenders.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getTendersByStatus(status: string): Promise<Tender[]> {
@@ -412,7 +412,7 @@ export class DatabaseStorage implements IStorage {
   async updateVendor(id: number, updates: Partial<InsertVendor>): Promise<Vendor | undefined> {
     const [vendor] = await db
       .update(vendors)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updates)
       .where(eq(vendors.id, id))
       .returning();
     return vendor || undefined;
@@ -420,7 +420,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteVendor(id: number): Promise<boolean> {
     const result = await db.delete(vendors).where(eq(vendors.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getSubmissions(): Promise<Submission[]> {
@@ -470,7 +470,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocument(id: number): Promise<boolean> {
     const result = await db.delete(documents).where(eq(documents.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 
