@@ -32,6 +32,7 @@ import AnalyticsDashboard from "@/pages/analytics-dashboard";
 import SmartRecommendations from "@/pages/smart-recommendations";
 import CollaborativeWorkspace from "@/pages/collaborative-workspace";
 import GamificationCenter from "@/pages/gamification-center";
+import AIConfiguration from "@/pages/ai-configuration";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -78,6 +79,7 @@ function Router() {
       <Route path="/collaborative-workspace" component={CollaborativeWorkspace} />
       <Route path="/gamification" component={GamificationCenter} />
       <Route path="/achievements" component={GamificationCenter} />
+      <Route path="/ai-configuration" component={AIConfiguration} />
       <Route path="/settings" component={Settings} />
       <Route path="/oem" component={OEMManagement} />
       <Route path="/utility" component={Settings} />
