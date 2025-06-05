@@ -24,6 +24,20 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
+interface AIStatusResponse {
+  anthropic: {
+    configured: boolean;
+    model: string;
+    status: string;
+  };
+  openai: {
+    configured: boolean;
+    model: string;
+    status: string;
+  };
+  recommendations: string[];
+}
+
 interface AIAnalysis {
   id: string;
   type: 'document' | 'risk' | 'prediction' | 'intelligence';
@@ -45,11 +59,11 @@ export default function AISuite() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [analysisText, setAnalysisText] = useState("");
   const [activeAnalysis, setActiveAnalysis] = useState<AIAnalysis | null>(null);
-
-  // Fetch AI configuration status
-  const { data: aiStatus, isLoading: statusLoading } = useQuery({
-    queryKey: ["/api/ai/status"],
-    refetchInterval: 30000 // Refresh every 30 seconds
+  
+  // AI Status query
+  const { data: aiStatus, isLoading: statusLoading } = useQuery<AIStatusResponse>({
+    queryKey: ['/api/ai/status'],
+    retry: false,
   });
 
   // Mock AI analysis data - in production this would come from AI services
