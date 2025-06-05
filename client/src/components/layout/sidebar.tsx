@@ -49,9 +49,9 @@ export default function Sidebar() {
       <div className="p-6 border-b border-border">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">T247</span>
+            <span className="text-white font-bold text-sm">ATP</span>
           </div>
-          <h1 className="text-xl font-bold text-foreground">TENDER247</h1>
+          <h1 className="text-xl font-bold text-foreground">AVGC TENDER PRO</h1>
         </div>
       </div>
 

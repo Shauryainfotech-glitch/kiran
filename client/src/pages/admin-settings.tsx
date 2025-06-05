@@ -554,7 +554,7 @@ export default function AdminSettings() {
                     id="siteName"
                     value={config.siteName}
                     onChange={(e) => handleConfigChange('siteName', e.target.value)}
-                    placeholder="TENDER247"
+                    placeholder="AVGC TENDER PRO"
                   />
                 </div>
                 <div>
