@@ -888,6 +888,71 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // OCR Document Processing endpoint for Gem Bid
+  app.post("/api/ocr/extract-tender-data", upload.single('document'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No document uploaded" });
+      }
+
+      const fileBuffer = req.file.buffer;
+      const fileType = req.file.mimetype;
+      
+      // Extract text from document based on type
+      let extractedText = "";
+      
+      if (fileType === 'application/pdf') {
+        // For PDF files, use pdf-parse
+        const pdfParse = require('pdf-parse');
+        const pdfData = await pdfParse(fileBuffer);
+        extractedText = pdfData.text;
+      } else if (fileType.startsWith('image/')) {
+        // For image files, use Tesseract OCR
+        const Tesseract = require('tesseract.js');
+        const { data: { text } } = await Tesseract.recognize(fileBuffer, 'eng');
+        extractedText = text;
+      } else {
+        return res.status(400).json({ message: "Unsupported file type" });
+      }
+
+      // Use Claude AI to extract structured data from the text
+      const structuredData = await claude.analyzeTenderDocument(extractedText);
+      
+      // Format the extracted data to match our Gem Bid schema
+      const gemBidData = {
+        title: structuredData.title || "",
+        description: structuredData.description || "",
+        organization: structuredData.organization || structuredData.procuringEntity || "",
+        category: structuredData.category || "infrastructure",
+        estimatedValue: structuredData.estimatedValue || 0,
+        deadline: structuredData.deadline || structuredData.bidEndDate || "",
+        location: structuredData.location || structuredData.deliveryLocation || "",
+        priority: structuredData.priority || "medium",
+        requirements: structuredData.requirements || [],
+        tags: structuredData.tags || [],
+        bidNumber: structuredData.bidNumber || "",
+        bidType: structuredData.bidType || "",
+        department: structuredData.department || "",
+        itemCategory: structuredData.itemCategory || "",
+        contractPeriod: structuredData.contractPeriod || "",
+        evaluationMethod: structuredData.evaluationMethod || "",
+        technicalQualification: structuredData.technicalQualification || "",
+        financialDocument: structuredData.financialDocument || false,
+        emdRequired: structuredData.emdRequired || false,
+        epbcRequired: structuredData.epbcRequired || false,
+        msePurchasePreference: structuredData.msePurchasePreference || false
+      };
+
+      res.json(gemBidData);
+    } catch (error: any) {
+      console.error('OCR processing error:', error);
+      res.status(500).json({ 
+        message: "Failed to process document", 
+        error: error.message 
+      });
+    }
+  });
+
   // Firms management routes
   app.get("/api/firms", async (req, res) => {
     try {

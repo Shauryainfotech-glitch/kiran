@@ -12,11 +12,13 @@ import {
   Search, Filter, Plus, FileText, Calendar,
   MapPin, DollarSign, Clock, Users, Eye,
   Download, Share2, Star, AlertCircle, CheckCircle,
-  Building2, Trophy, Target, TrendingUp
+  Building2, Trophy, Target, TrendingUp, Upload, 
+  Scan, Brain, File
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface GemBid {
   id: number;
@@ -43,6 +45,11 @@ export default function GemBid() {
   const [selectedPriority, setSelectedPriority] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [createMethod, setCreateMethod] = useState<"manual" | "upload">("manual");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [extractedData, setExtractedData] = useState<any>(null);
+  const { toast } = useToast();
 
   const { data: gemBids, isLoading } = useQuery({
     queryKey: ['/api/gem-bids'],
@@ -62,8 +69,61 @@ export default function GemBid() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
       setIsCreateDialogOpen(false);
+      setCreateMethod("manual");
+      setUploadedFile(null);
+      setExtractedData(null);
+      toast({
+        title: "Success",
+        description: "Gem bid created successfully",
+      });
     }
   });
+
+  const processDocumentMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('document', file);
+      return await apiRequest('/api/ocr/extract-tender-data', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: (data) => {
+      setExtractedData(data);
+      setIsProcessing(false);
+      toast({
+        title: "Document Processed",
+        description: "Tender data extracted successfully. Review and modify as needed.",
+      });
+    },
+    onError: (error) => {
+      setIsProcessing(false);
+      toast({
+        title: "Processing Failed",
+        description: "Failed to extract data from document. Please try manual entry.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a PDF, JPEG, or PNG file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setUploadedFile(file);
+      setIsProcessing(true);
+      processDocumentMutation.mutate(file);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -134,22 +194,97 @@ export default function GemBid() {
                 Create Gem Bid
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Gem Bid</DialogTitle>
                 <DialogDescription>
-                  Add a new premium bidding opportunity to your portfolio
+                  Add a new premium bidding opportunity - create manually or upload tender document for automatic extraction
                 </DialogDescription>
               </DialogHeader>
+              
+              {/* Creation Method Selection */}
+              <div className="flex items-center space-x-4 mb-6">
+                <Button
+                  type="button"
+                  variant={createMethod === "manual" ? "default" : "outline"}
+                  onClick={() => setCreateMethod("manual")}
+                  className="flex items-center space-x-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Manual Entry</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={createMethod === "upload" ? "default" : "outline"}
+                  onClick={() => setCreateMethod("upload")}
+                  className="flex items-center space-x-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>Upload Document</span>
+                </Button>
+              </div>
+
+              {createMethod === "upload" && (
+                <div className="border-2 border-dashed border-border rounded-lg p-6 mb-6">
+                  <div className="text-center">
+                    <File className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-medium">Upload Tender Document</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Upload a PDF, JPEG, or PNG file containing tender information. 
+                        Our AI will automatically extract and populate the form fields.
+                      </p>
+                      <Input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={handleFileUpload}
+                        disabled={isProcessing}
+                        className="max-w-xs mx-auto"
+                      />
+                      {uploadedFile && (
+                        <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+                          <FileText className="w-4 h-4" />
+                          <span>{uploadedFile.name}</span>
+                          {isProcessing && (
+                            <div className="flex items-center space-x-2">
+                              <Scan className="w-4 h-4 animate-spin" />
+                              <span>Processing...</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {extractedData && (
+                        <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Data extracted successfully - review and modify below</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <form action={handleCreateGemBid} className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="title">Bid Title</Label>
-                    <Input id="title" name="title" placeholder="Enter bid title" required />
+                    <Input 
+                      id="title" 
+                      name="title" 
+                      placeholder="Enter bid title" 
+                      defaultValue={extractedData?.title || ""} 
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="organization">Organization</Label>
-                    <Input id="organization" name="organization" placeholder="Organization name" required />
+                    <Input 
+                      id="organization" 
+                      name="organization" 
+                      placeholder="Organization name" 
+                      defaultValue={extractedData?.organization || ""} 
+                      required 
+                    />
                   </div>
                 </div>
                 
