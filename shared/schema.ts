@@ -240,8 +240,73 @@ export const gemBids = pgTable("gem_bids", {
   msePurchasePreference: boolean("mse_purchase_preference").default(false),
   status: text("status").default("active"),
   submissionCount: integer("submission_count").default(0),
+  
+  // GeM Bid Lifecycle Stages (1-14)
+  currentStage: integer("current_stage").default(1),
+  
+  // Stage tracking fields
+  searchKeywords: text("search_keywords").array(),
+  eligibilityCriteria: text("eligibility_criteria"),
+  deliveryTerms: text("delivery_terms"),
+  consigneeDetails: jsonb("consignee_details"),
+  
+  // Pre-bid Query (Stage 3)
+  preBidQuerySubmitted: boolean("pre_bid_query_submitted").default(false),
+  preBidQueryText: text("pre_bid_query_text"),
+  
+  // Technical Bid (Stage 5)
+  technicalBidSubmitted: boolean("technical_bid_submitted").default(false),
+  technicalBidDate: timestamp("technical_bid_date"),
+  technicalEvaluationStatus: text("technical_evaluation_status"),
+  
+  // Financial Bid (Stage 6)
+  financialBidSubmitted: boolean("financial_bid_submitted").default(false),
+  financialBidDate: timestamp("financial_bid_date"),
+  unitRate: decimal("unit_rate", { precision: 15, scale: 2 }),
+  gstRate: decimal("gst_rate", { precision: 5, scale: 2 }),
+  
+  // Reverse Auction (Stage 8)
+  reverseAuctionScheduled: boolean("reverse_auction_scheduled").default(false),
+  reverseAuctionDate: timestamp("reverse_auction_date"),
+  reverseAuctionParticipated: boolean("reverse_auction_participated").default(false),
+  finalBidAmount: decimal("final_bid_amount", { precision: 15, scale: 2 }),
+  
+  // PO & Delivery (Stages 9-11)
+  poReceived: boolean("po_received").default(false),
+  poNumber: text("po_number"),
+  poAcceptanceDate: timestamp("po_acceptance_date"),
+  deliveryDate: timestamp("delivery_date"),
+  deliveryStatus: text("delivery_status"),
+  
+  // Invoice & Payment (Stages 12-13)
+  invoiceUploaded: boolean("invoice_uploaded").default(false),
+  invoiceNumber: text("invoice_number"),
+  paymentReceived: boolean("payment_received").default(false),
+  paymentDate: timestamp("payment_date"),
+  utrNumber: text("utr_number"),
+  
+  // Performance & Feedback (Stage 14)
+  performanceRating: decimal("performance_rating", { precision: 2, scale: 1 }),
+  buyerFeedback: text("buyer_feedback"),
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// GeM Bid Stages tracking table
+export const gemBidStages = pgTable("gem_bid_stages", {
+  id: serial("id").primaryKey(),
+  gemBidId: integer("gem_bid_id").references(() => gemBids.id),
+  stageNumber: integer("stage_number").notNull(),
+  stageName: text("stage_name").notNull(),
+  status: text("status").default("pending"), // pending, in_progress, completed, skipped
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  checklist: jsonb("checklist"),
+  documents: text("documents").array(),
+  assignedTo: integer("assigned_to").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -368,3 +433,11 @@ export type FirmDocument = typeof firmDocuments.$inferSelect;
 
 export type InsertGemBid = z.infer<typeof insertGemBidSchema>;
 export type GemBid = typeof gemBids.$inferSelect;
+
+export const insertGemBidStageSchema = createInsertSchema(gemBidStages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertGemBidStage = z.infer<typeof insertGemBidStageSchema>;
+export type GemBidStage = typeof gemBidStages.$inferSelect;

@@ -1,0 +1,15 @@
+Stage No.,Stage,Important Fields,Checklist / Verification,GeM Portal Section
+1,Bid Search,"Keyword, Category, Buyer Name, Location, Bid Type, Bid Status",Filters saved? | Relevant category selected? | Active bids only?,GeM > Bids > Search
+2,Bid Analysis,"Bid No., Bid Type, BoQ File, Eligibility Criteria, EMD, Delivery Terms, Consignee Details",Custom/BoQ format verified? | Technical criteria matched? | MSME exemption applicable?,Bid Details Page
+3,Pre-Bid Query (Optional),"Query Text, Attachment, Submission Time",Q&A window open? | Question clear and relevant? | Supporting doc attached?,Bid > Q&A Tab
+4,Document Preparation,"Tech Specs, Authorization Letter, PAN, GST, Experience Proof, ISO, Brochures",All docs in PDF? | Authorization updated? | File size as per limit?,Offline
+5,Technical Bid Submission,"BoQ Compliance, Specification Match, Uploads, Terms Acceptance, DSC",All fields filled? | Terms accepted? | DSC working?,Bid > Participate > Technical
+6,Financial Bid Submission,"Unit Rate, GST Rate, BoQ Format Upload, Price Breakup",GST shown separately? | Correct BoQ used? | All columns filled?,Bid > Participate > Financial
+7,Technical Evaluation (by Buyer),"Evaluation Status, Clarification Request, Response Time",Clarifications answered? | Auto alerts monitored?,Evaluation Tab
+8,Reverse Auction,"RA Window Time, Starting Price, Decrement Range",System time correct? | Token active? | Internet stable?,RA Tab
+9,PO Acceptance,"PO No., Acceptance Click, Commitment Date, Acknowledgment Upload",Accepted within 10 days? | Terms agreed?,PO Tab > Accept
+10,Dispatch & Delivery,"Delivery Challan, GRN, Transport Details, Photo Upload",All items as per specs? | Delivered on time?,Offline + GeM PO Tab
+11,Inspection by Consignee,"Status: Accepted/Rejected, Comments",Partial/Full rejection managed? | Response submitted?,PO Status
+12,Invoice Upload,"Invoice No., Tax Breakup, PO No., Upload PDF",GSTIN match? | PO No. correct? | Invoice readable?,Invoice Tab
+13,Payment Tracking,"Payment Status, UTR No., Payment Date",Delay >30 days? | PFMS error tracked?,Payment Tab
+14,Feedback & Performance,"Rating, Comments, Review Filing",Rating ≥3 stars? | Feedback fair?,Feedback Tab
