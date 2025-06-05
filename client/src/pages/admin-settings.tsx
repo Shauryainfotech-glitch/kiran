@@ -25,7 +25,13 @@ import {
   Trash2,
   Plus,
   Save,
-  AlertTriangle
+  AlertTriangle,
+  Brain,
+  Bot,
+  Cpu,
+  BookOpen,
+  Upload,
+  Download
 } from "lucide-react";
 import { ROLES, PERMISSIONS, ROLE_PERMISSIONS, getRoleDisplayName } from "@shared/rbac";
 
@@ -121,7 +127,7 @@ export default function AdminSettings() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="users">
             <Users className="h-4 w-4 mr-2" />
             User Management
@@ -133,6 +139,10 @@ export default function AdminSettings() {
           <TabsTrigger value="system">
             <Server className="h-4 w-4 mr-2" />
             System Config
+          </TabsTrigger>
+          <TabsTrigger value="ai-llm">
+            <Brain className="h-4 w-4 mr-2" />
+            AI & LLM
           </TabsTrigger>
           <TabsTrigger value="security">
             <Lock className="h-4 w-4 mr-2" />
@@ -572,6 +582,451 @@ export default function AdminSettings() {
                   <div>
                     <Label>Archive Old Data After (months)</Label>
                     <Input type="number" defaultValue="24" min="6" max="120" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-llm" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Brain className="h-5 w-5 mr-2" />
+                  AI Model Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">OpenAI GPT Models</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>OpenAI API Key</Label>
+                      <Input type="password" placeholder="sk-..." />
+                    </div>
+                    <div>
+                      <Label>Default GPT Model</Label>
+                      <Select defaultValue="gpt-4o">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gpt-4o">GPT-4o (Latest)</SelectItem>
+                          <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+                          <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                          <SelectItem value="gpt-4">GPT-4</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Temperature</Label>
+                      <Input type="number" defaultValue="0.7" min="0" max="2" step="0.1" />
+                    </div>
+                    <div>
+                      <Label>Max Tokens</Label>
+                      <Input type="number" defaultValue="4096" min="1" max="8192" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Enable OpenAI</Label>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Anthropic Claude</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Anthropic API Key</Label>
+                      <Input type="password" placeholder="sk-ant-..." />
+                    </div>
+                    <div>
+                      <Label>Claude Model</Label>
+                      <Select defaultValue="claude-3-sonnet">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
+                          <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
+                          <SelectItem value="claude-3-haiku">Claude 3 Haiku</SelectItem>
+                          <SelectItem value="claude-instant">Claude Instant</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Max Tokens</Label>
+                      <Input type="number" defaultValue="4096" min="1" max="8192" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Claude</Label>
+                      <Switch />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Bot className="h-5 w-5 mr-2" />
+                  Google AI & Gemini
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Google Gemini</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Google AI API Key</Label>
+                      <Input type="password" placeholder="AIza..." />
+                    </div>
+                    <div>
+                      <Label>Gemini Model</Label>
+                      <Select defaultValue="gemini-pro">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gemini-ultra">Gemini Ultra</SelectItem>
+                          <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
+                          <SelectItem value="gemini-pro-vision">Gemini Pro Vision</SelectItem>
+                          <SelectItem value="gemini-nano">Gemini Nano</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Project ID</Label>
+                      <Input placeholder="avgc-tender-ai" />
+                    </div>
+                    <div>
+                      <Label>Location</Label>
+                      <Select defaultValue="us-central1">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="us-central1">US Central</SelectItem>
+                          <SelectItem value="us-east1">US East</SelectItem>
+                          <SelectItem value="europe-west1">Europe West</SelectItem>
+                          <SelectItem value="asia-southeast1">Asia Southeast</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Gemini</Label>
+                      <Switch />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Custom AI Endpoints</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Custom API Endpoint</Label>
+                      <Input placeholder="https://api.custom-ai.com/v1" />
+                    </div>
+                    <div>
+                      <Label>Custom API Key</Label>
+                      <Input type="password" placeholder="Custom API Key" />
+                    </div>
+                    <div>
+                      <Label>Model Name</Label>
+                      <Input placeholder="custom-model-v1" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Custom AI</Label>
+                      <Switch />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <BookOpen className="h-5 w-5 mr-2" />
+                Knowledge Base Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Tender Knowledge Base</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Knowledge Base Type</Label>
+                      <Select defaultValue="vectordb">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="vectordb">Vector Database</SelectItem>
+                          <SelectItem value="elasticsearch">Elasticsearch</SelectItem>
+                          <SelectItem value="pinecone">Pinecone</SelectItem>
+                          <SelectItem value="chromadb">ChromaDB</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Embedding Model</Label>
+                      <Select defaultValue="text-embedding-ada-002">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text-embedding-ada-002">OpenAI Ada-002</SelectItem>
+                          <SelectItem value="text-embedding-3-small">OpenAI Embedding-3-Small</SelectItem>
+                          <SelectItem value="text-embedding-3-large">OpenAI Embedding-3-Large</SelectItem>
+                          <SelectItem value="sentence-transformers">Sentence Transformers</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Chunk Size</Label>
+                      <Input type="number" defaultValue="1000" min="100" max="8000" />
+                    </div>
+                    <div>
+                      <Label>Chunk Overlap</Label>
+                      <Input type="number" defaultValue="200" min="0" max="500" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Document Processing</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Auto-index New Documents</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>OCR for Scanned Documents</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Multi-language Support</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div>
+                      <Label>Supported Languages</Label>
+                      <Select defaultValue="multi">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="english">English Only</SelectItem>
+                          <SelectItem value="hindi">Hindi & English</SelectItem>
+                          <SelectItem value="multi">Multi-language</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 border rounded-lg">
+                <h4 className="font-medium mb-3">Upload Knowledge Base Documents</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button variant="outline" className="h-20 border-dashed">
+                    <div className="text-center">
+                      <Upload className="h-6 w-6 mx-auto mb-2" />
+                      <span className="text-sm">Tender Documents</span>
+                    </div>
+                  </Button>
+                  <Button variant="outline" className="h-20 border-dashed">
+                    <div className="text-center">
+                      <Upload className="h-6 w-6 mx-auto mb-2" />
+                      <span className="text-sm">Legal Documents</span>
+                    </div>
+                  </Button>
+                  <Button variant="outline" className="h-20 border-dashed">
+                    <div className="text-center">
+                      <Upload className="h-6 w-6 mx-auto mb-2" />
+                      <span className="text-sm">Compliance Rules</span>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Cpu className="h-5 w-5 mr-2" />
+                AI Assistant Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Document Analysis</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Auto-extract Key Info</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Risk Assessment</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Compliance Check</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div>
+                      <Label>Analysis Confidence Threshold</Label>
+                      <Input type="number" defaultValue="0.8" min="0.1" max="1.0" step="0.1" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Bid Optimization</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Price Recommendations</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Competitor Analysis</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Success Probability</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div>
+                      <Label>Optimization Model</Label>
+                      <Select defaultValue="hybrid">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="conservative">Conservative</SelectItem>
+                          <SelectItem value="balanced">Balanced</SelectItem>
+                          <SelectItem value="aggressive">Aggressive</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Workflow Automation</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Auto-generate Responses</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Smart Task Assignment</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Deadline Predictions</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div>
+                      <Label>Automation Level</Label>
+                      <Select defaultValue="medium">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low (Manual Review)</SelectItem>
+                          <SelectItem value="medium">Medium (Semi-auto)</SelectItem>
+                          <SelectItem value="high">High (Auto with Review)</SelectItem>
+                          <SelectItem value="full">Full Automation</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Settings className="h-5 w-5 mr-2" />
+                Advanced AI Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Performance Tuning</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Response Cache TTL (minutes)</Label>
+                      <Input type="number" defaultValue="30" min="1" max="1440" />
+                    </div>
+                    <div>
+                      <Label>Concurrent Requests Limit</Label>
+                      <Input type="number" defaultValue="10" min="1" max="100" />
+                    </div>
+                    <div>
+                      <Label>Request Timeout (seconds)</Label>
+                      <Input type="number" defaultValue="60" min="10" max="300" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Response Streaming</Label>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Privacy & Security</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Data Anonymization</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Local Processing Mode</Label>
+                      <Switch />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Audit AI Interactions</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <div>
+                      <Label>Data Retention (days)</Label>
+                      <Input type="number" defaultValue="90" min="7" max="365" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">AI Usage Statistics</h4>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600">2,340</div>
+                    <div className="text-blue-700">Total Requests</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-green-600">98.5%</div>
+                    <div className="text-green-700">Success Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-600">1.2s</div>
+                    <div className="text-purple-700">Avg Response</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-orange-600">₹12.4K</div>
+                    <div className="text-orange-700">Monthly Cost</div>
                   </div>
                 </div>
               </div>
