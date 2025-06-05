@@ -114,6 +114,8 @@ export class MemStorage implements IStorage {
   private currentFirmId: number;
   private currentDocumentCategoryId: number;
   private currentFirmDocumentId: number;
+  private gemBids: Map<number, GemBid>;
+  private currentGemBidId: number;
 
   constructor() {
     this.users = new Map();
