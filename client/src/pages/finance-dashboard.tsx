@@ -47,56 +47,31 @@ interface TodayActivity {
 }
 
 export default function FinanceDashboard() {
-  // Mock data for demonstration - in real app this would come from API
+  // Finance data will be fetched from API in production
   const financeStats: FinanceStats = {
-    emdPayment: { paid: 4318026301, refund: 848579 },
+    emdPayment: { paid: 0, refund: 0 },
     sdPayment: { paid: 0, refund: 0 },
-    emdUnderProcess: 3000000,
+    emdUnderProcess: 0,
     emdForfeited: 0,
     sdForfeited: 0,
-    expired: { emd: 2270974427, sd: 0 },
+    expired: { emd: 0, sd: 0 },
     newRequests: { 
-      bankGuarantee: 10000, 
+      bankGuarantee: 0, 
       securityDeposit: 0, 
-      fees: 13668277, 
+      fees: 0, 
       others: 0,
-      emd: 343244
+      emd: 0
     },
     usedRequests: { 
       bankGuarantee: 0, 
       securityDeposit: 0, 
-      fees: 14785, 
+      fees: 0, 
       others: 0,
-      emd: 340988
+      emd: 0
     }
   };
 
-  const todayActivities: TodayActivity[] = [
-    { 
-      id: 6500, 
-      assignee: "Yogesh Gadhavi", 
-      assignBy: "Palak Shah",
-      dueDate: "08-04-2025 18:43", 
-      submissionDate: "08-04-2025",
-      status: "Assigned"
-    },
-    { 
-      id: 6500, 
-      assignee: "Vinisha Patel", 
-      assignBy: "Palak Shah",
-      dueDate: "02-04-2025 18:04", 
-      submissionDate: "08-04-2025",
-      status: "In Progress"
-    },
-    { 
-      id: 6500, 
-      assignee: "Palak Shah", 
-      assignBy: "Admin",
-      dueDate: "02-04-2025 18:04", 
-      submissionDate: "08-04-2025",
-      status: "Completed"
-    }
-  ];
+  const todayActivities: TodayActivity[] = [];
 
   const currentDate = new Date();
   const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
