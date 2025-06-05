@@ -644,15 +644,16 @@ export default function AdminSettings() {
                     </div>
                     <div>
                       <Label>Claude Model</Label>
-                      <Select defaultValue="claude-3-sonnet">
+                      <Select defaultValue="claude-sonnet-4-20250514">
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-                          <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
-                          <SelectItem value="claude-3-haiku">Claude 3 Haiku</SelectItem>
-                          <SelectItem value="claude-instant">Claude Instant</SelectItem>
+                          <SelectItem value="claude-sonnet-4-20250514">Claude Sonnet 4 (Latest)</SelectItem>
+                          <SelectItem value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</SelectItem>
+                          <SelectItem value="claude-3-sonnet-20240229">Claude 3 Sonnet</SelectItem>
+                          <SelectItem value="claude-3-opus-20240229">Claude 3 Opus</SelectItem>
+                          <SelectItem value="claude-3-haiku-20240307">Claude 3 Haiku</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -662,7 +663,7 @@ export default function AdminSettings() {
                     </div>
                     <div className="flex items-center justify-between">
                       <Label>Enable Claude</Label>
-                      <Switch />
+                      <Switch defaultChecked />
                     </div>
                   </div>
                 </div>
