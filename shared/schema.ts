@@ -365,3 +365,6 @@ export type DocumentCategory = typeof documentCategories.$inferSelect;
 
 export type InsertFirmDocument = z.infer<typeof insertFirmDocumentSchema>;
 export type FirmDocument = typeof firmDocuments.$inferSelect;
+
+export type InsertGemBid = z.infer<typeof insertGemBidSchema>;
+export type GemBid = typeof gemBids.$inferSelect;

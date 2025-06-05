@@ -7,6 +7,7 @@ import {
   firms,
   documentCategories,
   firmDocuments,
+  gemBids,
   type User, 
   type InsertUser,
   type Tender,
@@ -22,7 +23,9 @@ import {
   type DocumentCategory,
   type InsertDocumentCategory,
   type FirmDocument,
-  type InsertFirmDocument
+  type InsertFirmDocument,
+  type GemBid,
+  type InsertGemBid
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -83,6 +86,15 @@ export interface IStorage {
   createFirmDocument(document: InsertFirmDocument): Promise<FirmDocument>;
   updateFirmDocument(id: number, document: Partial<InsertFirmDocument>): Promise<FirmDocument | undefined>;
   deleteFirmDocument(id: number): Promise<boolean>;
+
+  // Gem Bids
+  getGemBids(): Promise<GemBid[]>;
+  getGemBid(id: number): Promise<GemBid | undefined>;
+  createGemBid(gemBid: InsertGemBid): Promise<GemBid>;
+  updateGemBid(id: number, gemBid: Partial<InsertGemBid>): Promise<GemBid | undefined>;
+  deleteGemBid(id: number): Promise<boolean>;
+  getGemBidsByCategory(category: string): Promise<GemBid[]>;
+  getGemBidsByStatus(status: string): Promise<GemBid[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -938,6 +950,46 @@ export class DatabaseStorage implements IStorage {
   async deleteDocument(id: number): Promise<boolean> {
     const result = await db.delete(documents).where(eq(documents.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  // Gem Bids
+  async getGemBids(): Promise<GemBid[]> {
+    return await db.select().from(gemBids);
+  }
+
+  async getGemBid(id: number): Promise<GemBid | undefined> {
+    const [gemBid] = await db.select().from(gemBids).where(eq(gemBids.id, id));
+    return gemBid;
+  }
+
+  async createGemBid(insertGemBid: InsertGemBid): Promise<GemBid> {
+    const [gemBid] = await db
+      .insert(gemBids)
+      .values(insertGemBid)
+      .returning();
+    return gemBid;
+  }
+
+  async updateGemBid(id: number, updates: Partial<InsertGemBid>): Promise<GemBid | undefined> {
+    const [gemBid] = await db
+      .update(gemBids)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(gemBids.id, id))
+      .returning();
+    return gemBid;
+  }
+
+  async deleteGemBid(id: number): Promise<boolean> {
+    const result = await db.delete(gemBids).where(eq(gemBids.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async getGemBidsByCategory(category: string): Promise<GemBid[]> {
+    return await db.select().from(gemBids).where(eq(gemBids.category, category));
+  }
+
+  async getGemBidsByStatus(status: string): Promise<GemBid[]> {
+    return await db.select().from(gemBids).where(eq(gemBids.status, status));
   }
 }
 
