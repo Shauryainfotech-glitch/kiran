@@ -23,7 +23,8 @@ const navigationItems = [
   { href: "/vendors", label: "Vendor Management", icon: Building },
   { href: "/tasks", label: "Task Management", icon: Users },
   { href: "/reports", label: "Reports & Analytics", icon: FileText },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/admin", label: "System Admin", icon: Settings },
+  { href: "/settings", label: "User Settings", icon: Settings },
 ];
 
 export default function Sidebar() {
