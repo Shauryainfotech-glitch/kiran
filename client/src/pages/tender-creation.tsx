@@ -13,15 +13,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface TenderForm {
   title: string;
+  reference: string;
   description: string;
   category: string;
   estimatedValue: string;
   submissionDeadline: string;
-  technicalRequirements: string;
-  eligibilityCriteria: string;
-  contactEmail: string;
   location: string;
-  duration: string;
+  department: string;
+  organizationName: string;
+  documentFees: string;
+  emdValue: string;
+  ownership: string;
 }
 
 interface OCRResult {
@@ -36,15 +38,17 @@ export default function TenderCreation() {
   const [activeTab, setActiveTab] = useState("manual");
   const [formData, setFormData] = useState<TenderForm>({
     title: "",
+    reference: "",
     description: "",
     category: "",
     estimatedValue: "",
     submissionDeadline: "",
-    technicalRequirements: "",
-    eligibilityCriteria: "",
-    contactEmail: "",
     location: "",
-    duration: ""
+    department: "",
+    organizationName: "",
+    documentFees: "",
+    emdValue: "",
+    ownership: ""
   });
   
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -93,15 +97,17 @@ export default function TenderCreation() {
             // Map Claude analysis to form fields
             const extractedData: Partial<TenderForm> = {
               title: analysis.extractedFields?.title || "",
+              reference: analysis.extractedFields?.reference || `TND-${Date.now()}`,
               description: analysis.extractedFields?.description || "",
               category: analysis.extractedFields?.category || "",
               estimatedValue: analysis.extractedFields?.estimatedValue || "",
               submissionDeadline: analysis.extractedFields?.deadline || "",
-              technicalRequirements: analysis.extractedFields?.technicalRequirements || "",
-              eligibilityCriteria: analysis.extractedFields?.eligibilityCriteria || "",
-              contactEmail: analysis.extractedFields?.contactEmail || "",
               location: analysis.extractedFields?.location || "",
-              duration: analysis.extractedFields?.duration || ""
+              department: analysis.extractedFields?.department || "",
+              organizationName: analysis.extractedFields?.organizationName || "",
+              documentFees: analysis.extractedFields?.documentFees || "",
+              emdValue: analysis.extractedFields?.emdValue || "",
+              ownership: analysis.extractedFields?.ownership || ""
             };
 
             setOcrResult({
@@ -123,6 +129,7 @@ export default function TenderCreation() {
           setOcrResult({
             extractedData: {
               title: file.name.replace(/\.[^/.]+$/, ""),
+              reference: `TND-${Date.now()}`,
               description: "Document uploaded successfully - please fill in the details manually"
             },
             confidence: 0,
@@ -190,15 +197,17 @@ export default function TenderCreation() {
         // Reset form
         setFormData({
           title: "",
+          reference: "",
           description: "",
           category: "",
           estimatedValue: "",
           submissionDeadline: "",
-          technicalRequirements: "",
-          eligibilityCriteria: "",
-          contactEmail: "",
           location: "",
-          duration: ""
+          department: "",
+          organizationName: "",
+          documentFees: "",
+          emdValue: "",
+          ownership: ""
         });
       }
     } catch (error) {
@@ -297,23 +306,22 @@ export default function TenderCreation() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Project Duration</Label>
+                  <Label htmlFor="reference">Reference Number</Label>
                   <Input
-                    id="duration"
-                    value={formData.duration}
-                    onChange={(e) => handleInputChange('duration', e.target.value)}
-                    placeholder="e.g., 12 months"
+                    id="reference"
+                    value={formData.reference}
+                    onChange={(e) => handleInputChange('reference', e.target.value)}
+                    placeholder="e.g., TND-2024-001"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Contact Email</Label>
+                  <Label htmlFor="department">Department</Label>
                   <Input
-                    id="contactEmail"
-                    type="email"
-                    value={formData.contactEmail}
-                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                    placeholder="Enter contact email"
+                    id="department"
+                    value={formData.department}
+                    onChange={(e) => handleInputChange('department', e.target.value)}
+                    placeholder="Enter department name"
                   />
                 </div>
               </div>
