@@ -1894,6 +1894,337 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // Smart Recommendations API
+  app.get("/api/recommendations/smart", async (req, res) => {
+    try {
+      const recommendations = [
+        {
+          id: 1,
+          tenderId: 1,
+          tenderTitle: "Infrastructure Development Project",
+          matchScore: 87,
+          confidenceLevel: 92,
+          reasoning: [
+            "Strong alignment with your construction expertise",
+            "Similar successful projects in your portfolio",
+            "Favorable client relationship history"
+          ],
+          category: "Infrastructure",
+          estimatedValue: 2500000,
+          deadline: "2024-02-15",
+          riskLevel: "medium",
+          successProbability: 78,
+          requiredCapabilities: ["Project Management", "Civil Engineering", "Safety Compliance"],
+          missingCapabilities: ["Environmental Impact Assessment"],
+          recommendedActions: [
+            "Partner with environmental consulting firm",
+            "Highlight past infrastructure successes",
+            "Submit proposal 2 weeks before deadline"
+          ],
+          historicalContext: "Similar tenders won at 65% success rate"
+        }
+      ];
+      res.json(recommendations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recommendations" });
+    }
+  });
+
+  app.get("/api/recommendations/profile", async (req, res) => {
+    try {
+      const profile = {
+        industries: ["Construction", "Infrastructure", "Technology"],
+        capabilities: ["Project Management", "Engineering", "Quality Assurance"],
+        successRate: 72.5,
+        averageBidValue: 1200000
+      };
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.post("/api/recommendations/preferences", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  app.post("/api/recommendations/track", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to track interaction" });
+    }
+  });
+
+  app.post("/api/recommendations/insights", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate insights" });
+    }
+  });
+
+  // Collaborative Workspace API
+  app.get("/api/collaboration/documents", async (req, res) => {
+    try {
+      const documents = [
+        {
+          id: "doc-1",
+          name: "Project Specification Document.pdf",
+          type: "pdf",
+          url: "/documents/spec.pdf",
+          pages: 25,
+          lastModified: "2024-01-15T10:30:00Z",
+          collaborators: ["user1", "user2", "user3"]
+        }
+      ];
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch documents" });
+    }
+  });
+
+  app.get("/api/collaboration/annotations/:documentId", async (req, res) => {
+    try {
+      const annotations = [
+        {
+          id: "ann-1",
+          documentId: req.params.documentId,
+          userId: "user1",
+          userName: "John Doe",
+          type: "comment",
+          content: "This section needs clarification",
+          position: { x: 100, y: 200, page: 1 },
+          color: "#fbbf24",
+          timestamp: "2024-01-15T10:30:00Z",
+          resolved: false,
+          replies: [],
+          mentions: [],
+          tags: []
+        }
+      ];
+      res.json(annotations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch annotations" });
+    }
+  });
+
+  app.get("/api/collaboration/active-users/:documentId", async (req, res) => {
+    try {
+      const activeUsers = [
+        {
+          id: "user1",
+          name: "John Doe",
+          cursor: { x: 150, y: 250 },
+          color: "#3b82f6",
+          isTyping: false,
+          lastSeen: "2024-01-15T10:30:00Z"
+        }
+      ];
+      res.json(activeUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch active users" });
+    }
+  });
+
+  app.post("/api/collaboration/annotations", async (req, res) => {
+    try {
+      const annotation = { id: Date.now().toString(), ...req.body };
+      res.json(annotation);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create annotation" });
+    }
+  });
+
+  app.patch("/api/collaboration/annotations/:id", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update annotation" });
+    }
+  });
+
+  app.post("/api/collaboration/annotations/:id/replies", async (req, res) => {
+    try {
+      const reply = { id: Date.now().toString(), ...req.body };
+      res.json(reply);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add reply" });
+    }
+  });
+
+  app.post("/api/collaboration/cursor", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update cursor" });
+    }
+  });
+
+  // Gamification API
+  app.get("/api/gamification/profile", async (req, res) => {
+    try {
+      const profile = {
+        id: "user1",
+        name: "John Doe",
+        level: 15,
+        totalPoints: 2450,
+        pointsToNextLevel: 550,
+        currentLevelPoints: 450,
+        maxLevelPoints: 1000,
+        rank: 1,
+        totalUsers: 150,
+        streak: 7,
+        badges: ["early-adopter", "team-player", "high-achiever"],
+        tier: "gold"
+      };
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.get("/api/gamification/achievements", async (req, res) => {
+    try {
+      const achievements = [
+        {
+          id: "ach-1",
+          title: "First Submission",
+          description: "Submit your first tender proposal",
+          icon: "trophy",
+          category: "milestone",
+          points: 100,
+          rarity: "common",
+          unlocked: true,
+          unlockedAt: "2024-01-10T10:00:00Z",
+          progress: 1,
+          maxProgress: 1,
+          requirements: ["Submit 1 tender proposal"]
+        },
+        {
+          id: "ach-2",
+          title: "Winning Streak",
+          description: "Win 5 consecutive tender proposals",
+          icon: "star",
+          category: "performance",
+          points: 500,
+          rarity: "epic",
+          unlocked: false,
+          progress: 2,
+          maxProgress: 5,
+          requirements: ["Win 5 consecutive tenders"]
+        }
+      ];
+      res.json(achievements);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  app.get("/api/gamification/challenges", async (req, res) => {
+    try {
+      const challenges = [
+        {
+          id: "ch-1",
+          title: "Daily Reviewer",
+          description: "Review 3 tender documents today",
+          type: "daily",
+          points: 50,
+          progress: 1,
+          maxProgress: 3,
+          expiresAt: "2024-01-15T23:59:59Z",
+          completed: false,
+          difficulty: "easy"
+        },
+        {
+          id: "ch-2",
+          title: "Weekly Optimizer",
+          description: "Use AI recommendations 10 times this week",
+          type: "weekly",
+          points: 200,
+          progress: 3,
+          maxProgress: 10,
+          expiresAt: "2024-01-21T23:59:59Z",
+          completed: false,
+          difficulty: "medium"
+        }
+      ];
+      res.json(challenges);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch challenges" });
+    }
+  });
+
+  app.get("/api/gamification/leaderboard/:period", async (req, res) => {
+    try {
+      const leaderboard = [
+        {
+          id: "user1",
+          name: "John Doe",
+          points: 2450,
+          level: 15,
+          rank: 1,
+          tier: "gold",
+          weeklyPoints: 350,
+          monthlyPoints: 1200
+        },
+        {
+          id: "user2",
+          name: "Jane Smith",
+          points: 2200,
+          level: 14,
+          rank: 2,
+          tier: "silver",
+          weeklyPoints: 280,
+          monthlyPoints: 980
+        }
+      ];
+      res.json(leaderboard);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
+  app.get("/api/gamification/activity", async (req, res) => {
+    try {
+      const activity = [
+        {
+          description: "Completed achievement: First Submission",
+          points: 100,
+          timestamp: "2 hours ago"
+        },
+        {
+          description: "Used AI recommendation for tender analysis",
+          points: 25,
+          timestamp: "5 hours ago"
+        }
+      ];
+      res.json(activity);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch activity" });
+    }
+  });
+
+  app.post("/api/gamification/achievements/:id/claim", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to claim achievement" });
+    }
+  });
+
+  app.post("/api/gamification/challenges/:id/start", async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to start challenge" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
