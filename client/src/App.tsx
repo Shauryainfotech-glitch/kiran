@@ -58,7 +58,7 @@ function Router() {
       <Route path="/user-management" component={Vendors} />
       <Route path="/ai-suite" component={AISuite} />
       <Route path="/tender-add" component={TenderCreation} />
-      <Route path="/admin" component={AdminSettings} />
+      <Route path="/admin-settings" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>
   );
