@@ -61,15 +61,15 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  // Initialize WebSocket server for real-time functionality
-  const wsManager = initializeWebSocket(server);
   
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
-    log(`WebSocket server ready for real-time communications`);
+    // Initialize WebSocket server after server is listening
+    try {
+      const wsManager = initializeWebSocket(server);
+      log(`WebSocket server ready for real-time communications`);
+    } catch (error) {
+      log(`WebSocket initialization skipped: ${error.message}`);
+    }
   });
 })();
