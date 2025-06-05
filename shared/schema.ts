@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -113,6 +113,65 @@ export const firmDocuments = pgTable("firm_documents", {
   description: text("description"),
   uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
   createdBy: integer("created_by").references(() => users.id),
+  version: integer("version").default(1),
+  parentDocumentId: integer("parent_document_id"),
+  isLatestVersion: boolean("is_latest_version").default(true),
+  approvalStatus: text("approval_status").default("Pending"),
+  approvedBy: integer("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  tags: text("tags").array(),
+  priority: text("priority").default("Medium"),
+  confidentialityLevel: text("confidentiality_level").default("Public"),
+});
+
+// Document versions table for version history
+export const documentVersions = pgTable("document_versions", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => firmDocuments.id),
+  version: integer("version").notNull(),
+  fileName: text("file_name"),
+  fileSize: integer("file_size"),
+  changes: text("changes"),
+  uploadedBy: integer("uploaded_by").references(() => users.id),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
+// Document audit log
+export const documentAuditLog = pgTable("document_audit_log", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => firmDocuments.id),
+  action: text("action").notNull(),
+  details: text("details"),
+  performedBy: integer("performed_by").references(() => users.id),
+  performedAt: timestamp("performed_at").defaultNow(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+});
+
+// Document shares and permissions
+export const documentShares = pgTable("document_shares", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => firmDocuments.id),
+  sharedWith: integer("shared_with").references(() => users.id),
+  sharedBy: integer("shared_by").references(() => users.id),
+  permission: text("permission").default("view"), // view, edit, admin
+  sharedAt: timestamp("shared_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+});
+
+// Document bulk operations
+export const documentBulkOperations = pgTable("document_bulk_operations", {
+  id: serial("id").primaryKey(),
+  operationType: text("operation_type").notNull(), // move, delete, update_status, bulk_approve
+  documentIds: integer("document_ids").array(),
+  parameters: jsonb("parameters"), // operation-specific parameters
+  status: text("status").default("pending"), // pending, in_progress, completed, failed
+  initiatedBy: integer("initiated_by").references(() => users.id),
+  initiatedAt: timestamp("initiated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  errorMessage: text("error_message"),
+  affectedCount: integer("affected_count"),
 });
 
 export const financeTransactions = pgTable("finance_transactions", {
