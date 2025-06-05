@@ -10,7 +10,7 @@ interface HeaderProps {
   onSearchChange: (query: string) => void;
 }
 
-const pagetitles: Record<string, string> = {
+const pageTitles: Record<string, string> = {
   "/": "Dashboard",
   "/tenders": "All Tenders",
   "/calendar": "Calendar",
@@ -23,7 +23,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const [location] = useLocation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   
-  const pageTitle = pageTitle[location] || "Dashboard";
+  const pageTitle = pageTitles[location] || "Dashboard";
 
   return (
     <>

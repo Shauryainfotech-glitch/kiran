@@ -42,9 +42,9 @@ export default function Sidebar() {
           
           return (
             <Link key={item.href} href={item.href}>
-              <a
+              <div
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors cursor-pointer",
                   isActive 
                     ? "bg-primary text-primary-foreground" 
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -52,7 +52,7 @@ export default function Sidebar() {
               >
                 <Icon className="h-5 w-5" />
                 <span>{item.label}</span>
-              </a>
+              </div>
             </Link>
           );
         })}

@@ -75,13 +75,75 @@ export class MemStorage implements IStorage {
     this.currentSubmissionId = 1;
     this.currentDocumentId = 1;
 
-    // Create default admin user
+    // Create default admin user with sample data
     this.createUser({
       username: "admin",
       password: "admin123",
       name: "John Smith",
       role: "tender_manager",
       email: "admin@tenderflow.com"
+    }).then(() => {
+      // Add sample tenders for demonstration
+      this.createTender({
+        title: "IT Infrastructure Upgrade",
+        reference: "TND-2024-001",
+        description: "Complete modernization of company IT infrastructure including servers, networking equipment, and security systems.",
+        category: "IT Services",
+        estimatedValue: "150000",
+        submissionDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        status: "published",
+        createdBy: 1
+      });
+
+      this.createTender({
+        title: "Office Building Renovation",
+        reference: "TND-2024-002", 
+        description: "Comprehensive renovation of main office building including HVAC, electrical, and interior design.",
+        category: "Construction",
+        estimatedValue: "500000",
+        submissionDeadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        status: "published",
+        createdBy: 1
+      });
+
+      this.createTender({
+        title: "Marketing Campaign Strategy",
+        reference: "TND-2024-003",
+        description: "Development and execution of comprehensive digital marketing strategy for Q2 product launch.",
+        category: "Marketing",
+        estimatedValue: "75000",
+        submissionDeadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 21 days from now
+        status: "draft",
+        createdBy: 1
+      });
+
+      // Add sample vendors
+      this.createVendor({
+        name: "TechSolutions Inc",
+        email: "contact@techsolutions.com",
+        phone: "+1-555-0123",
+        address: "123 Tech Street, Silicon Valley, CA 94000",
+        contactPerson: "Sarah Johnson",
+        registrationNumber: "TS-2024-001"
+      });
+
+      this.createVendor({
+        name: "BuildPro Construction",
+        email: "info@buildpro.com", 
+        phone: "+1-555-0456",
+        address: "456 Construction Ave, Builder City, TX 75001",
+        contactPerson: "Mike Rodriguez",
+        registrationNumber: "BP-2024-002"
+      });
+
+      this.createVendor({
+        name: "Creative Marketing Solutions",
+        email: "hello@creativems.com",
+        phone: "+1-555-0789",
+        address: "789 Creative Blvd, Design Town, NY 10001",
+        contactPerson: "Emma Wilson",
+        registrationNumber: "CMS-2024-003"
+      });
     });
   }
 
@@ -98,7 +160,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      role: insertUser.role || "viewer",
+      email: insertUser.email || null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -121,7 +188,11 @@ export class MemStorage implements IStorage {
       ...insertTender, 
       id, 
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      status: insertTender.status || "draft",
+      description: insertTender.description || null,
+      estimatedValue: insertTender.estimatedValue || null,
+      createdBy: insertTender.createdBy || null
     };
     this.tenders.set(id, tender);
     return tender;
@@ -162,7 +233,12 @@ export class MemStorage implements IStorage {
     const vendor: Vendor = { 
       ...insertVendor, 
       id, 
-      createdAt: new Date()
+      createdAt: new Date(),
+      email: insertVendor.email || null,
+      phone: insertVendor.phone || null,
+      address: insertVendor.address || null,
+      contactPerson: insertVendor.contactPerson || null,
+      registrationNumber: insertVendor.registrationNumber || null
     };
     this.vendors.set(id, vendor);
     return vendor;
@@ -202,7 +278,10 @@ export class MemStorage implements IStorage {
     const submission: Submission = { 
       ...insertSubmission, 
       id, 
-      submittedAt: new Date()
+      submittedAt: new Date(),
+      status: insertSubmission.status || "submitted",
+      bidAmount: insertSubmission.bidAmount || null,
+      notes: insertSubmission.notes || null
     };
     this.submissions.set(id, submission);
     return submission;
@@ -234,7 +313,9 @@ export class MemStorage implements IStorage {
     const document: Document = { 
       ...insertDocument, 
       id, 
-      uploadedAt: new Date()
+      uploadedAt: new Date(),
+      tenderId: insertDocument.tenderId || null,
+      submissionId: insertDocument.submissionId || null
     };
     this.documents.set(id, document);
     return document;
