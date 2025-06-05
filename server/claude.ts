@@ -194,7 +194,7 @@ export async function checkCompliance(documentContent: string, regulations: stri
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-sonnet-4-20250514',
       system: `You are a compliance expert for the AVGC TENDER platform. Check document compliance against regulations and provide assessment in JSON format with keys: "isCompliant" (boolean), "complianceScore" (0-100), "violations" (array), "recommendations" (array), "requiredActions" (array).`,
       max_tokens: 1024,
       messages: [
@@ -231,7 +231,7 @@ export async function summarizeTenderDocument(documentText: string): Promise<str
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       messages: [
         { 
