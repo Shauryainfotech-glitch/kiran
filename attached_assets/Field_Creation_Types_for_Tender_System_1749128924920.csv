@@ -1,0 +1,58 @@
+Field Name,Field Creation Type
+Keyword,Text Field
+Category,Dropdown
+Buyer Name,Text Field
+Location,Dropdown / Auto-Fill
+Bid Type,Dropdown
+Bid Status,"Dropdown (Published, Closed, Cancelled)"
+Bid No.,Auto Number / Text
+BoQ File,File Upload (Excel/PDF)
+Eligibility Criteria,Multi-line Text Area
+EMD,Numeric Field + Currency
+Delivery Terms,Dropdown / Text
+Consignee Details,Text Area / Structured Form
+Query Text,Multi-line Text
+Attachment,File Upload
+Submission Time,Date-Time Picker
+Tech Specs,File Upload / Text Area
+Authorization Letter,File Upload
+PAN,Text
+GST,Text
+Experience Proof,File Upload
+ISO,Dropdown / File Upload
+Brochures,File Upload
+BoQ Compliance,Checkbox / Dropdown
+Specification Match,Checkbox / Dropdown
+Uploads,Multiple File Upload
+Terms Acceptance,Checkbox
+DSC,Verification Checkbox / Status
+Unit Rate,Numeric
+GST Rate,Dropdown / Numeric
+BoQ Format Upload,File Upload
+Price Breakup,Text / Table Input
+Evaluation Status,Dropdown (Qualified/Rejected)
+Clarification Request,Text Area
+Response Time,Date-Time Picker
+RA Window Time,Date-Time Range Picker
+Starting Price,Numeric
+Decrement Range,Numeric
+PO No.,Auto-generated / Text
+Acceptance Click,Checkbox
+Commitment Date,Date Picker
+Acknowledgment Upload,File Upload
+Delivery Challan,File Upload
+GRN,Text Field / File Upload
+Transport Details,Text Area
+Photo Upload,Image Upload
+Status,Dropdown (Accepted/Rejected/Partial)
+Comments,Multi-line Text
+Invoice No.,Text
+Tax Breakup,Table / Structured Text
+PO No.,Reference Lookup
+Upload PDF,File Upload
+Payment Status,Dropdown (Paid/Pending/Rejected)
+UTR No.,Text
+Payment Date,Date Picker
+Rating,Rating Field (1-5 Stars)
+Comments,Multi-line Text
+Review Filing,Checkbox / File Upload
