@@ -28,12 +28,12 @@ export default function TenderTable({ tenders, onEdit, onDelete, onView }: Tende
     const matchesSearch = 
       tender.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tender.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tender.category.toLowerCase().includes(searchQuery.toLowerCase());
+      (tender.category && tender.category.toLowerCase().includes(searchQuery.toLowerCase()));
     
     return matchesStatus && matchesCategory && matchesSearch;
   });
 
-  const categories = Array.from(new Set(tenders.map(t => t.category)));
+  const categories = Array.from(new Set(tenders.map(t => t.category).filter(cat => cat && cat.trim() !== "")));
   const statuses = ["draft", "published", "in_progress", "closed", "awarded"];
 
   const handleSelectAll = (checked: boolean) => {
