@@ -28,6 +28,11 @@ import {
   AlertTriangle,
   Star,
   MessageSquare,
+  MoreHorizontal,
+  Expand,
+  Grid,
+  List,
+  ArrowUpDown,
   History,
   Share2,
   Copy,
@@ -35,8 +40,6 @@ import {
   RefreshCw,
   Filter as FilterIcon,
   SortAsc,
-  Grid,
-  List,
   Settings,
   Bookmark,
   Bell,
@@ -926,31 +929,6 @@ export default function GemBid() {
 
               {/* Bids Grid/List */}
               <div className={viewMode === 'grid' ? 'grid gap-4' : 'space-y-4'}>
-                {filteredAndSortedGemBids.map((bid) => {
-                
-                {selectedBids.length > 0 && (
-                  <div className="flex items-center space-x-2">
-                    <Select onValueChange={handleBulkStatusUpdate}>
-                      <SelectTrigger className="w-36">
-                        <SelectValue placeholder="Change Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Set Active</SelectItem>
-                        <SelectItem value="draft">Set Draft</SelectItem>
-                        <SelectItem value="submitted">Set Submitted</SelectItem>
-                        <SelectItem value="closed">Set Closed</SelectItem>
-                        <SelectItem value="awarded">Set Awarded</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
-                      Delete ({selectedBids.length})
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Bids Grid/List */}
-              <div className={viewMode === 'grid' ? 'grid gap-4' : 'space-y-4'}>
                 {filteredAndSortedGemBids.map((bid) => (
                   <Card key={bid.id} className={`hover:shadow-md transition-shadow ${
                     selectedBids.includes(bid.id) ? 'ring-2 ring-primary' : ''
@@ -1006,15 +984,116 @@ export default function GemBid() {
                         </div>
                         
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleBookmark(bid.id)}
+                          >
+                            <Star className={`w-4 h-4 ${bookmarkedBids.includes(bid.id) ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                          </Button>
+                          <span className={`text-xs px-2 py-1 rounded ${getTimeRemaining(bid.deadline).color}`}>
+                            {getTimeRemaining(bid.deadline).text}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Enhanced Bid Actions */}
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">
                             {bid.submissionCount} submissions
                           </span>
-                          <Button variant="outline" size="sm">
+                          {bid.tags && bid.tags.length > 0 && (
+                            <div className="flex gap-1">
+                              {bid.tags.slice(0, 2).map((tag) => (
+                                <Badge key={tag} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {bid.tags.length > 2 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{bid.tags.length - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewDetails(bid)}
+                          >
                             <Eye className="w-4 h-4 mr-1" />
                             View Details
                           </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => handleEditBid(bid)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit Bid
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toggleCardExpansion(bid.id)}>
+                                <Expand className="w-4 h-4 mr-2" />
+                                {expandedCards.includes(bid.id) ? 'Collapse' : 'Expand'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toggleBookmark(bid.id)}>
+                                <Star className="w-4 h-4 mr-2" />
+                                {bookmarkedBids.includes(bid.id) ? 'Remove Bookmark' : 'Bookmark'}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteBid(bid.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Bid
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
+                      
+                      {/* Expanded Card Content */}
+                      {expandedCards.includes(bid.id) && (
+                        <div className="pt-4 border-t space-y-3">
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Requirements</h4>
+                            <div className="space-y-1">
+                              {bid.requirements?.map((req, index) => (
+                                <div key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                                  {req}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {bid.documents && bid.documents.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Documents</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {bid.documents.map((doc, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    <FileText className="w-3 h-3 mr-1" />
+                                    {doc}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="text-xs text-muted-foreground">
+                            Created on {format(new Date(bid.createdAt), 'MMM dd, yyyy')}
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
