@@ -884,102 +884,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFirmDocument(id: number): Promise<boolean> {
     const result = await db.delete(firmDocuments).where(eq(firmDocuments.id, id));
-    return result.rowCount > 0;
-  }
-
-  async getTenders(): Promise<Tender[]> {
-    return await db.select().from(tenders);
-  }
-
-  async getTender(id: number): Promise<Tender | undefined> {
-    const [tender] = await db.select().from(tenders).where(eq(tenders.id, id));
-    return tender || undefined;
-  }
-
-  async createTender(insertTender: InsertTender): Promise<Tender> {
-    const [tender] = await db
-      .insert(tenders)
-      .values(insertTender)
-      .returning();
-    return tender;
-  }
-
-  async updateTender(id: number, updates: Partial<InsertTender>): Promise<Tender | undefined> {
-    const [tender] = await db
-      .update(tenders)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(tenders.id, id))
-      .returning();
-    return tender || undefined;
-  }
-
-  async deleteTender(id: number): Promise<boolean> {
-    const result = await db.delete(tenders).where(eq(tenders.id, id));
     return (result.rowCount || 0) > 0;
   }
 
   async getTendersByStatus(status: string): Promise<Tender[]> {
     return await db.select().from(tenders).where(eq(tenders.status, status));
-  }
-
-  async getVendors(): Promise<Vendor[]> {
-    return await db.select().from(vendors);
-  }
-
-  async getVendor(id: number): Promise<Vendor | undefined> {
-    const [vendor] = await db.select().from(vendors).where(eq(vendors.id, id));
-    return vendor || undefined;
-  }
-
-  async createVendor(insertVendor: InsertVendor): Promise<Vendor> {
-    const [vendor] = await db
-      .insert(vendors)
-      .values(insertVendor)
-      .returning();
-    return vendor;
-  }
-
-  async updateVendor(id: number, updates: Partial<InsertVendor>): Promise<Vendor | undefined> {
-    const [vendor] = await db
-      .update(vendors)
-      .set(updates)
-      .where(eq(vendors.id, id))
-      .returning();
-    return vendor || undefined;
-  }
-
-  async deleteVendor(id: number): Promise<boolean> {
-    const result = await db.delete(vendors).where(eq(vendors.id, id));
-    return (result.rowCount || 0) > 0;
-  }
-
-  async getSubmissions(): Promise<Submission[]> {
-    return await db.select().from(submissions);
-  }
-
-  async getSubmissionsByTender(tenderId: number): Promise<Submission[]> {
-    return await db.select().from(submissions).where(eq(submissions.tenderId, tenderId));
-  }
-
-  async getSubmissionsByVendor(vendorId: number): Promise<Submission[]> {
-    return await db.select().from(submissions).where(eq(submissions.vendorId, vendorId));
-  }
-
-  async createSubmission(insertSubmission: InsertSubmission): Promise<Submission> {
-    const [submission] = await db
-      .insert(submissions)
-      .values(insertSubmission)
-      .returning();
-    return submission;
-  }
-
-  async updateSubmission(id: number, updates: Partial<InsertSubmission>): Promise<Submission | undefined> {
-    const [submission] = await db
-      .update(submissions)
-      .set(updates)
-      .where(eq(submissions.id, id))
-      .returning();
-    return submission || undefined;
   }
 
   async getDocuments(): Promise<Document[]> {

@@ -2496,8 +2496,15 @@ File type: ${req.file.mimetype}`;
   // Gem Bid API
   app.get("/api/gem-bids", async (req, res) => {
     try {
-      // Use fallback data with comprehensive tender management features
-      const gemBids = [
+      // Fetch real data from database if getGemBids method exists
+      let gemBids = [];
+      if (typeof storage.getGemBids === 'function') {
+        gemBids = await storage.getGemBids();
+      }
+      
+      // If no data exists, provide structured demonstration data
+      if (!gemBids || gemBids.length === 0) {
+        const demonstrationData = [
           {
             id: 1,
             title: "Smart City Infrastructure Development",
@@ -2585,6 +2592,9 @@ File type: ${req.file.mimetype}`;
             }
           }
         ];
+        return res.json(demonstrationData);
+      }
+      
       res.json(gemBids);
     } catch (error) {
       console.error('Error in gem-bids endpoint:', error);
