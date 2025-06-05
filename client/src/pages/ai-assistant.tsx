@@ -364,16 +364,16 @@ export default function AIAssistant() {
                 <div className="space-y-2">
                   <Label>Automation Level</Label>
                   <Select 
-                    value={config.documentAnalysis.automationLevel} 
+                    value={config.documentAnalysis.automationLevel || "Medium (Semi-auto)"} 
                     onValueChange={(value) => handleConfigChange('documentAnalysis', 'automationLevel', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select automation level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Low (Manual)">Low (Manual)</SelectItem>
-                      <SelectItem value="Medium (Semi-auto)">Medium (Semi-auto)</SelectItem>
-                      <SelectItem value="High (Auto)">High (Auto)</SelectItem>
+                      <SelectItem value="low-manual">Low (Manual)</SelectItem>
+                      <SelectItem value="medium-semi-auto">Medium (Semi-auto)</SelectItem>
+                      <SelectItem value="high-auto">High (Auto)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -381,16 +381,16 @@ export default function AIAssistant() {
                 <div className="space-y-2">
                   <Label>Optimization Model</Label>
                   <Select 
-                    value={config.documentAnalysis.optimizationModel} 
+                    value={config.documentAnalysis.optimizationModel || "hybrid"} 
                     onValueChange={(value) => handleConfigChange('documentAnalysis', 'optimizationModel', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select optimization model" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Speed">Speed</SelectItem>
-                      <SelectItem value="Accuracy">Accuracy</SelectItem>
-                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem value="speed">Speed</SelectItem>
+                      <SelectItem value="accuracy">Accuracy</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
