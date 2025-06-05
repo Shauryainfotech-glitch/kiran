@@ -10,6 +10,7 @@ import { Upload, FileText, Scan, Plus, AlertCircle, CheckCircle } from "lucide-r
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createWorker } from 'tesseract.js';
 
 interface TenderForm {
   title: string;
@@ -66,6 +67,177 @@ export default function TenderCreation() {
 
   const [dragActive, setDragActive] = useState(false);
 
+  const processDocumentFile = async (file: File) => {
+    const fileType = file.type;
+    const fileName = file.name.toLowerCase();
+    let extractedText = '';
+
+    try {
+      if (fileType.includes('image') || fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        // Use Tesseract.js for image OCR
+        const worker = await createWorker('eng');
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
+        extractedText = text;
+      } else if (fileType.includes('pdf') || fileName.endsWith('.pdf')) {
+        // For PDF files, convert to FormData and send to server
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/documents/extract-pdf', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          extractedText = data.text;
+        } else {
+          throw new Error('PDF extraction failed');
+        }
+      } else if (fileType.includes('document') || fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
+        // For Word documents, convert to FormData and send to server
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('/api/documents/extract-word', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          extractedText = data.text;
+        } else {
+          throw new Error('Word document extraction failed');
+        }
+      } else {
+        // Try reading as text for other file types
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+          reader.onload = () => {
+            extractedText = reader.result as string;
+            resolve(extractedText);
+          };
+          reader.onerror = reject;
+          reader.readAsText(file);
+        });
+      }
+
+      // Use extracted text for analysis
+      await analyzeExtractedText(extractedText);
+      
+    } catch (error) {
+      console.error('Document processing error:', error);
+      // Fallback with basic file info
+      setOcrResult({
+        extractedData: {
+          title: file.name.replace(/\.[^/.]+$/, ""),
+          reference: `TND-${Date.now()}`,
+          description: "Document uploaded - manual entry required"
+        },
+        confidence: 25,
+        documentType: "Document",
+        processing: false,
+        completed: true
+      });
+    }
+  };
+
+  const analyzeExtractedText = async (text: string) => {
+    try {
+      // Try Claude AI analysis first
+      const response = await fetch('/api/ai/claude/analyze-document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentText: text })
+      });
+
+      if (response.ok) {
+        const analysis = await response.json();
+        
+        const extractedData: Partial<TenderForm> = {
+          title: analysis.extractedFields?.title || "",
+          reference: analysis.extractedFields?.reference || `TND-${Date.now()}`,
+          description: analysis.extractedFields?.description || "",
+          category: analysis.extractedFields?.category || "",
+          estimatedValue: analysis.extractedFields?.estimatedValue || "",
+          submissionDeadline: analysis.extractedFields?.deadline || "",
+          location: analysis.extractedFields?.location || "",
+          department: analysis.extractedFields?.department || "",
+          organizationName: analysis.extractedFields?.organizationName || "",
+          documentFees: analysis.extractedFields?.documentFees || "",
+          emdValue: analysis.extractedFields?.emdValue || "",
+          ownership: analysis.extractedFields?.ownership || ""
+        };
+
+        setOcrResult({
+          extractedData,
+          confidence: analysis.complianceScore || 85,
+          documentType: analysis.documentType || "Tender Document",
+          processing: false,
+          completed: true
+        });
+
+        setFormData(prev => ({ ...prev, ...extractedData }));
+      } else {
+        throw new Error('AI analysis failed');
+      }
+    } catch (error) {
+      console.error('Document analysis error:', error);
+      
+      // Basic text analysis fallback
+      const basicExtraction = extractBasicInfo(text);
+      setOcrResult({
+        extractedData: basicExtraction,
+        confidence: 60,
+        documentType: "Document",
+        processing: false,
+        completed: true
+      });
+      
+      setFormData(prev => ({ ...prev, ...basicExtraction }));
+    }
+  };
+
+  const extractBasicInfo = (text: string): Partial<TenderForm> => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const extraction: Partial<TenderForm> = {
+      reference: `TND-${Date.now()}`
+    };
+
+    // Basic pattern matching for common tender fields
+    for (const line of lines) {
+      const lower = line.toLowerCase();
+      
+      if (!extraction.title && (lower.includes('tender') || lower.includes('notice') || lower.includes('invitation'))) {
+        extraction.title = line.trim();
+      }
+      
+      if (lower.includes('deadline') || lower.includes('submission')) {
+        const dateMatch = line.match(/\d{1,2}[-\/]\d{1,2}[-\/]\d{4}/);
+        if (dateMatch) {
+          extraction.submissionDeadline = dateMatch[0];
+        }
+      }
+      
+      if (lower.includes('value') || lower.includes('amount') || lower.includes('cost')) {
+        const valueMatch = line.match(/[\d,]+/);
+        if (valueMatch) {
+          extraction.estimatedValue = valueMatch[0].replace(/,/g, '');
+        }
+      }
+      
+      if (lower.includes('location') || lower.includes('place') || lower.includes('address')) {
+        extraction.location = line.trim();
+      }
+    }
+
+    extraction.description = text.substring(0, 500) + (text.length > 500 ? '...' : '');
+    
+    return extraction;
+  };
+
   const handleFileUpload = async (file: File) => {
     if (!file) return;
 
@@ -79,76 +251,20 @@ export default function TenderCreation() {
     });
 
     try {
-      // Convert file to text for Claude analysis
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const documentText = e.target?.result as string;
-        
-        try {
-          const response = await fetch('/api/ai/claude/analyze-document', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ documentText })
-          });
-
-          if (response.ok) {
-            const analysis = await response.json();
-            
-            // Map Claude analysis to form fields
-            const extractedData: Partial<TenderForm> = {
-              title: analysis.extractedFields?.title || "",
-              reference: analysis.extractedFields?.reference || `TND-${Date.now()}`,
-              description: analysis.extractedFields?.description || "",
-              category: analysis.extractedFields?.category || "",
-              estimatedValue: analysis.extractedFields?.estimatedValue || "",
-              submissionDeadline: analysis.extractedFields?.deadline || "",
-              location: analysis.extractedFields?.location || "",
-              department: analysis.extractedFields?.department || "",
-              organizationName: analysis.extractedFields?.organizationName || "",
-              documentFees: analysis.extractedFields?.documentFees || "",
-              emdValue: analysis.extractedFields?.emdValue || "",
-              ownership: analysis.extractedFields?.ownership || ""
-            };
-
-            setOcrResult({
-              extractedData,
-              confidence: analysis.complianceScore || 85,
-              documentType: analysis.documentType || "Tender Document",
-              processing: false,
-              completed: true
-            });
-
-            // Auto-fill form with extracted data
-            setFormData(prev => ({ ...prev, ...extractedData }));
-          } else {
-            throw new Error('OCR analysis failed');
-          }
-        } catch (error) {
-          console.error('Document analysis error:', error);
-          // Fallback to basic file processing
-          setOcrResult({
-            extractedData: {
-              title: file.name.replace(/\.[^/.]+$/, ""),
-              reference: `TND-${Date.now()}`,
-              description: "Document uploaded successfully - please fill in the details manually"
-            },
-            confidence: 0,
-            documentType: "Unknown",
-            processing: false,
-            completed: true
-          });
-        }
-      };
-      
-      reader.readAsText(file);
+      // Process file based on type
+      await processDocumentFile(file);
     } catch (error) {
       console.error('File processing error:', error);
       setOcrResult({
-        extractedData: {},
-        confidence: 0,
-        documentType: "",
+        extractedData: {
+          title: file.name.replace(/\.[^/.]+$/, ""),
+          reference: `TND-${Date.now()}`,
+          description: "Document uploaded - please verify extracted information"
+        },
+        confidence: 50,
+        documentType: "Document",
         processing: false,
-        completed: false
+        completed: true
       });
     }
   };
@@ -196,7 +312,7 @@ export default function TenderCreation() {
         description: formData.description || null,
         category: formData.category,
         estimatedValue: formData.estimatedValue ? parseFloat(formData.estimatedValue) : null,
-        submissionDeadline: formData.submissionDeadline ? new Date(formData.submissionDeadline).toISOString() : new Date().toISOString(),
+        submissionDeadline: formData.submissionDeadline ? new Date(formData.submissionDeadline) : new Date(),
         location: formData.location || null,
         department: formData.department || null,
         organizationName: formData.organizationName || null,

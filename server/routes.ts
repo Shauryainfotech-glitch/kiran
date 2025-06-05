@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import { insertTenderSchema, insertVendorSchema, insertSubmissionSchema } from "@shared/schema";
 import { z } from "zod";
 import * as claude from "./claude";
+import multer from "multer";
+import pdfParse from "pdf-parse";
+import mammoth from "mammoth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Tenders routes
