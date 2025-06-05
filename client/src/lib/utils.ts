@@ -7,10 +7,21 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number | string) {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(num);
+  if (isNaN(num)) return '₹0';
+  
+  // Format large amounts in Crores and Lakhs (Indian system)
+  if (num >= 10000000) {
+    return `₹${(num / 10000000).toFixed(2)} Cr`;
+  } else if (num >= 100000) {
+    return `₹${(num / 100000).toFixed(2)} L`;
+  } else {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
+  }
 }
 
 export function formatDate(date: string | Date) {
