@@ -28,6 +28,7 @@ import BulkOperations from "@/pages/bulk-operations";
 import DocumentIntegrations from "@/pages/document-integrations";
 import DocumentWorkflows from "@/pages/document-workflows";
 import ProjectManagement from "@/pages/project-management";
+import AnalyticsDashboard from "@/pages/analytics-dashboard";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -68,6 +69,8 @@ function Router() {
       <Route path="/approvals" component={TaskManagement} />
       <Route path="/project-management" component={ProjectManagement} />
       <Route path="/projects" component={ProjectManagement} />
+      <Route path="/analytics-dashboard" component={AnalyticsDashboard} />
+      <Route path="/advanced-analytics" component={AnalyticsDashboard} />
       <Route path="/settings" component={Settings} />
       <Route path="/oem" component={OEMManagement} />
       <Route path="/utility" component={Settings} />
