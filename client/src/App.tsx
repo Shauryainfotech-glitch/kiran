@@ -17,6 +17,7 @@ import TaskManagement from "@/pages/task-management";
 import AISuite from "@/pages/ai-suite";
 import BlockchainVerification from "@/pages/blockchain-verification";
 import AdminSettings from "@/pages/admin-settings";
+import OEMManagement from "@/pages/oem-management";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -39,15 +40,22 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/ai-suite" component={AISuite} />
-      <Route path="/blockchain" component={BlockchainVerification} />
       <Route path="/finance-dashboard" component={FinanceDashboard} />
       <Route path="/tenders" component={Tenders} />
-      <Route path="/calendar" component={Calendar} />
-      <Route path="/vendors" component={Vendors} />
-      <Route path="/reports" component={Reports} />
+      <Route path="/tender-result" component={NotFound} />
+      <Route path="/analytics" component={Reports} />
       <Route path="/tasks" component={TaskManagement} />
+      <Route path="/finance" component={FinanceDashboard} />
+      <Route path="/mis" component={Reports} />
+      <Route path="/documents" component={NotFound} />
+      <Route path="/task" component={TaskManagement} />
+      <Route path="/approvals" component={NotFound} />
       <Route path="/settings" component={Settings} />
+      <Route path="/oem" component={OEMManagement} />
+      <Route path="/utility" component={NotFound} />
+      <Route path="/user-management" component={Vendors} />
+      <Route path="/ai-suite" component={AISuite} />
+      <Route path="/tender-add" component={Tenders} />
       <Route path="/admin" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>

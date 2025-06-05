@@ -9,22 +9,34 @@ import {
   File,
   Brain,
   Shield,
-  Users
+  Users,
+  CheckCircle,
+  Plus,
+  TrendingUp,
+  PieChart,
+  DollarSign,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { href: "/", label: "Sales Dashboard", icon: BarChart3 },
-  { href: "/ai-suite", label: "AVGC AI Suite", icon: Brain },
-  { href: "/blockchain", label: "Blockchain Verification", icon: Shield },
-  { href: "/finance-dashboard", label: "Finance Dashboard", icon: File },
-  { href: "/tenders", label: "Smart Tenders", icon: FolderOpen },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/vendors", label: "Vendor Management", icon: Building },
-  { href: "/tasks", label: "Task Management", icon: Users },
-  { href: "/reports", label: "Reports & Analytics", icon: FileText },
-  { href: "/admin", label: "System Admin", icon: Settings },
-  { href: "/settings", label: "User Settings", icon: Settings },
+  { href: "/finance-dashboard", label: "Finance Dashboard", icon: DollarSign },
+  { href: "/tenders", label: "Tender", icon: FolderOpen },
+  { href: "/tender-result", label: "Tender Result", icon: TrendingUp },
+  { href: "/analytics", label: "Analytics", icon: PieChart },
+  { href: "/tasks", label: "Tender Task", icon: CheckCircle },
+  { href: "/finance", label: "Finance Management", icon: DollarSign },
+  { href: "/mis", label: "MIS", icon: BarChart3 },
+  { href: "/documents", label: "Document Management", icon: FileText },
+  { href: "/task", label: "Task", icon: Users },
+  { href: "/approvals", label: "Approval's", icon: CheckCircle },
+  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/oem", label: "OEM Management", icon: Building },
+  { href: "/utility", label: "Utility", icon: Zap },
+  { href: "/user-management", label: "User Management", icon: Users },
+  { href: "/ai-suite", label: "AI Assistant", icon: Brain },
+  { href: "/tender-add", label: "Tender Add / Modify", icon: Plus },
 ];
 
 export default function Sidebar() {
@@ -35,10 +47,10 @@ export default function Sidebar() {
       {/* Logo and Brand */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <File className="h-4 w-4 text-primary-foreground" />
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">T247</span>
           </div>
-          <h1 className="text-xl font-bold text-foreground">AVGC TENDER</h1>
+          <h1 className="text-xl font-bold text-foreground">TENDER247</h1>
         </div>
       </div>
 
@@ -68,13 +80,17 @@ export default function Sidebar() {
 
       {/* User Profile */}
       <div className="p-4 border-t border-border">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-muted-foreground">JS</span>
+        <div className="text-xs text-muted-foreground mb-2">Made with Claude</div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-medium text-sm">PS</span>
+            </div>
+            <span className="text-sm font-medium text-foreground">Palak Shah</span>
           </div>
-          <div>
-            <p className="text-sm font-medium text-foreground">John Smith</p>
-            <p className="text-xs text-muted-foreground">Tender Manager</p>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            <Settings className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
       </div>
