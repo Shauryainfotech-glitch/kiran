@@ -34,6 +34,7 @@ import CollaborativeWorkspace from "@/pages/collaborative-workspace";
 import GamificationCenter from "@/pages/gamification-center";
 import AIConfiguration from "@/pages/ai-configuration";
 import GemBid from "@/pages/gem-bid";
+import TenderProcessing from "@/pages/tender-processing";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -82,6 +83,7 @@ function Router() {
       <Route path="/achievements" component={GamificationCenter} />
       <Route path="/ai-configuration" component={AIConfiguration} />
       <Route path="/gem-bid" component={GemBid} />
+      <Route path="/tender-processing" component={TenderProcessing} />
       <Route path="/settings" component={Settings} />
       <Route path="/oem" component={OEMManagement} />
       <Route path="/utility" component={Settings} />

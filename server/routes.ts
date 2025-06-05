@@ -2688,7 +2688,7 @@ File type: ${req.file.mimetype}`;
       const processingId = Date.now();
       
       // Real processing pipeline with OCR and AI analysis
-      const processingResult = {
+      const processingResult: any = {
         id: processingId,
         documents: documents.length,
         status: 'processing',
@@ -2730,8 +2730,10 @@ File type: ${req.file.mimetype}`;
 
       // Step 2: Real AI Analysis with Claude
       try {
-        const combinedText = processingResult.steps[0]?.results?.map(r => r.extractedText).join('\n\n') || '';
+        const combinedText = processingResult.steps[0]?.results?.map((r: any) => r.extractedText).join('\n\n') || '';
         
+        // Import Claude analysis function
+        const { analyzeTenderDocument } = await import('./claude');
         const aiAnalysis = await analyzeTenderDocument(combinedText);
         
         processingResult.steps.push({
@@ -2746,11 +2748,11 @@ File type: ${req.file.mimetype}`;
             'Quality standards assessed'
           ]
         });
-      } catch (aiError) {
+      } catch (aiError: any) {
         processingResult.steps.push({
           name: 'AI Analysis',
           status: 'error',
-          error: 'AI analysis failed - Claude API configuration required'
+          error: `AI analysis failed - ${aiError.message || 'Claude API configuration required'}`
         });
       }
 
