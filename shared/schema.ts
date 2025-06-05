@@ -66,6 +66,55 @@ export const documents = pgTable("documents", {
   uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
 });
 
+// Firms table for multiple firm management
+export const firms = pgTable("firms", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  registrationNumber: text("registration_number"),
+  address: text("address"),
+  contactPerson: text("contact_person"),
+  phone: text("phone"),
+  email: text("email"),
+  website: text("website"),
+  establishedDate: timestamp("established_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Document categories table
+export const documentCategories = pgTable("document_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  isRequired: boolean("is_required").default(false),
+  sortOrder: integer("sort_order").default(0),
+});
+
+// Firm documents table - enhanced document management per firm
+export const firmDocuments = pgTable("firm_documents", {
+  id: serial("id").primaryKey(),
+  firmId: integer("firm_id").references(() => firms.id).notNull(),
+  categoryId: integer("category_id").references(() => documentCategories.id),
+  documentName: text("document_name").notNull(),
+  documentNumber: text("document_number"),
+  fileName: text("file_name"),
+  fileSize: integer("file_size"),
+  fileType: text("file_type"),
+  status: text("status").default("Available"), // Available, In Process, As per need, etc.
+  validity: timestamp("validity"),
+  renewal: text("renewal"), // Every Year Update, Require, etc.
+  googleLinking: text("google_linking"),
+  responsible: text("responsible"),
+  charges: decimal("charges", { precision: 15, scale: 2 }),
+  duration: text("duration"),
+  challenges: text("challenges"),
+  timeline: text("timeline"),
+  description: text("description"),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  createdBy: integer("created_by").references(() => users.id),
+});
+
 export const financeTransactions = pgTable("finance_transactions", {
   id: serial("id").primaryKey(),
   tenderId: integer("tender_id").references(() => tenders.id),
@@ -168,6 +217,21 @@ export const insertApprovalSchema = createInsertSchema(approvals).omit({
   actionDate: true,
 });
 
+export const insertFirmSchema = createInsertSchema(firms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDocumentCategorySchema = createInsertSchema(documentCategories).omit({
+  id: true,
+});
+
+export const insertFirmDocumentSchema = createInsertSchema(firmDocuments).omit({
+  id: true,
+  uploadedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -191,3 +255,12 @@ export type Task = typeof tasks.$inferSelect;
 
 export type InsertApproval = z.infer<typeof insertApprovalSchema>;
 export type Approval = typeof approvals.$inferSelect;
+
+export type InsertFirm = z.infer<typeof insertFirmSchema>;
+export type Firm = typeof firms.$inferSelect;
+
+export type InsertDocumentCategory = z.infer<typeof insertDocumentCategorySchema>;
+export type DocumentCategory = typeof documentCategories.$inferSelect;
+
+export type InsertFirmDocument = z.infer<typeof insertFirmDocumentSchema>;
+export type FirmDocument = typeof firmDocuments.$inferSelect;

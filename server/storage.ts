@@ -4,6 +4,9 @@ import {
   vendors, 
   submissions, 
   documents,
+  firms,
+  documentCategories,
+  firmDocuments,
   type User, 
   type InsertUser,
   type Tender,
@@ -13,7 +16,13 @@ import {
   type Submission,
   type InsertSubmission,
   type Document,
-  type InsertDocument
+  type InsertDocument,
+  type Firm,
+  type InsertFirm,
+  type DocumentCategory,
+  type InsertDocumentCategory,
+  type FirmDocument,
+  type InsertFirmDocument
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -51,6 +60,29 @@ export interface IStorage {
   getDocumentsByTender(tenderId: number): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
   deleteDocument(id: number): Promise<boolean>;
+
+  // Firms
+  getFirms(): Promise<Firm[]>;
+  getFirm(id: number): Promise<Firm | undefined>;
+  createFirm(firm: InsertFirm): Promise<Firm>;
+  updateFirm(id: number, firm: Partial<InsertFirm>): Promise<Firm | undefined>;
+  deleteFirm(id: number): Promise<boolean>;
+
+  // Document Categories
+  getDocumentCategories(): Promise<DocumentCategory[]>;
+  getDocumentCategory(id: number): Promise<DocumentCategory | undefined>;
+  createDocumentCategory(category: InsertDocumentCategory): Promise<DocumentCategory>;
+  updateDocumentCategory(id: number, category: Partial<InsertDocumentCategory>): Promise<DocumentCategory | undefined>;
+  deleteDocumentCategory(id: number): Promise<boolean>;
+
+  // Firm Documents
+  getFirmDocuments(): Promise<FirmDocument[]>;
+  getFirmDocumentsByFirm(firmId: number): Promise<FirmDocument[]>;
+  getFirmDocumentsByCategory(categoryId: number): Promise<FirmDocument[]>;
+  getFirmDocument(id: number): Promise<FirmDocument | undefined>;
+  createFirmDocument(document: InsertFirmDocument): Promise<FirmDocument>;
+  updateFirmDocument(id: number, document: Partial<InsertFirmDocument>): Promise<FirmDocument | undefined>;
+  deleteFirmDocument(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
