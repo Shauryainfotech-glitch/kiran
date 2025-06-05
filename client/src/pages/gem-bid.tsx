@@ -703,25 +703,76 @@ export default function GemBid() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
-              {filteredGemBids.map((bid) => (
-                <Card key={bid.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg">{bid.title}</CardTitle>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Building2 className="w-4 h-4" />
-                          {bid.organization}
-                          <Badge variant="outline">{bid.category}</Badge>
+            <div className="space-y-4">
+              {/* Bulk Actions Header */}
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center space-x-4">
+                  <Checkbox
+                    checked={selectedBids.length === filteredGemBids.length && filteredGemBids.length > 0}
+                    onCheckedChange={handleSelectAll}
+                  />
+                  <span className="text-sm font-medium">
+                    {selectedBids.length > 0 
+                      ? `${selectedBids.length} of ${filteredGemBids.length} selected`
+                      : `Select all ${filteredGemBids.length} bids`
+                    }
+                  </span>
+                </div>
+                
+                {selectedBids.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <Select onValueChange={handleBulkStatusUpdate}>
+                      <SelectTrigger className="w-36">
+                        <SelectValue placeholder="Change Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Set Active</SelectItem>
+                        <SelectItem value="draft">Set Draft</SelectItem>
+                        <SelectItem value="submitted">Set Submitted</SelectItem>
+                        <SelectItem value="closed">Set Closed</SelectItem>
+                        <SelectItem value="awarded">Set Awarded</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                      Delete ({selectedBids.length})
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-4">
+                {filteredGemBids.map((bid) => (
+                  <Card key={bid.id} className={`hover:shadow-md transition-shadow ${
+                    selectedBids.includes(bid.id) ? 'ring-2 ring-primary' : ''
+                  }`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3">
+                          <Checkbox
+                            checked={selectedBids.includes(bid.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedBids([...selectedBids, bid.id]);
+                              } else {
+                                setSelectedBids(selectedBids.filter(id => id !== bid.id));
+                              }
+                            }}
+                          />
+                          <div className="space-y-1">
+                            <CardTitle className="text-lg">{bid.title}</CardTitle>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Building2 className="w-4 h-4" />
+                              {bid.organization}
+                              <Badge variant="outline">{bid.category}</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getPriorityColor(bid.priority)}>{bid.priority}</Badge>
+                          <Badge variant={getStatusColor(bid.status)}>{bid.status}</Badge>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={getPriorityColor(bid.priority)}>{bid.priority}</Badge>
-                        <Badge variant={getStatusColor(bid.status)}>{bid.status}</Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
+                    </CardHeader>
                   
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground line-clamp-2">
@@ -790,6 +841,7 @@ export default function GemBid() {
                   </CardContent>
                 </Card>
               ))}
+              </div>
             </div>
           )}
         </TabsContent>
