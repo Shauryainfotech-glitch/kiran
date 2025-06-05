@@ -29,6 +29,9 @@ import DocumentIntegrations from "@/pages/document-integrations";
 import DocumentWorkflows from "@/pages/document-workflows";
 import ProjectManagement from "@/pages/project-management";
 import AnalyticsDashboard from "@/pages/analytics-dashboard";
+import SmartRecommendations from "@/pages/smart-recommendations";
+import CollaborativeWorkspace from "@/pages/collaborative-workspace";
+import GamificationCenter from "@/pages/gamification-center";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -71,6 +74,10 @@ function Router() {
       <Route path="/projects" component={ProjectManagement} />
       <Route path="/analytics-dashboard" component={AnalyticsDashboard} />
       <Route path="/advanced-analytics" component={AnalyticsDashboard} />
+      <Route path="/smart-recommendations" component={SmartRecommendations} />
+      <Route path="/collaborative-workspace" component={CollaborativeWorkspace} />
+      <Route path="/gamification" component={GamificationCenter} />
+      <Route path="/achievements" component={GamificationCenter} />
       <Route path="/settings" component={Settings} />
       <Route path="/oem" component={OEMManagement} />
       <Route path="/utility" component={Settings} />
