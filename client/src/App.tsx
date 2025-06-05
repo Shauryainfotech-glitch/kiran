@@ -57,17 +57,17 @@ function Router() {
       <Route path="/tasks" component={TaskManagement} />
       <Route path="/finance" component={FinanceDashboard} />
       <Route path="/mis" component={Reports} />
-      <Route path="/documents" component={NotFound} />
+      <Route path="/documents" component={FirmDocuments} />
       <Route path="/firm-documents" component={FirmDocuments} />
       <Route path="/document-analytics" component={DocumentAnalytics} />
       <Route path="/bulk-operations" component={BulkOperations} />
       <Route path="/document-integrations" component={DocumentIntegrations} />
       <Route path="/document-workflows" component={DocumentWorkflows} />
       <Route path="/task" component={TaskManagement} />
-      <Route path="/approvals" component={NotFound} />
+      <Route path="/approvals" component={TaskManagement} />
       <Route path="/settings" component={Settings} />
       <Route path="/oem" component={OEMManagement} />
-      <Route path="/utility" component={NotFound} />
+      <Route path="/utility" component={Settings} />
       <Route path="/user-management" component={Vendors} />
       <Route path="/ai-suite" component={AISuite} />
       <Route path="/ai-assistant" component={AIAssistant} />
