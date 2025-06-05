@@ -60,8 +60,9 @@ export default function TenderCreation() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const [dragActive, setDragActive] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
     if (!file) return;
 
     setUploadedFile(file);
@@ -73,32 +74,103 @@ export default function TenderCreation() {
       completed: false
     });
 
-    // Simulate OCR processing
-    setTimeout(() => {
-      const mockExtractedData: Partial<TenderForm> = {
-        title: "Infrastructure Development Project - Phase 2",
-        description: "Comprehensive infrastructure development including road construction, utility installation, and landscaping for the new commercial district.",
-        category: "infrastructure",
-        estimatedValue: "2500000",
-        submissionDeadline: "2024-08-15",
-        technicalRequirements: "Must have experience in large-scale infrastructure projects, minimum 5 years in construction industry, certified equipment and materials.",
-        eligibilityCriteria: "Registered construction company with minimum annual turnover of ₹1 crore, valid contractor license, experience certificates.",
-        contactEmail: "procurement@citydev.gov.in",
-        location: "Mumbai, Maharashtra",
-        duration: "18 months"
+    try {
+      // Convert file to text for Claude analysis
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const documentText = e.target?.result as string;
+        
+        try {
+          const response = await fetch('/api/ai/claude/analyze-document', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ documentText })
+          });
+
+          if (response.ok) {
+            const analysis = await response.json();
+            
+            // Map Claude analysis to form fields
+            const extractedData: Partial<TenderForm> = {
+              title: analysis.extractedFields?.title || "",
+              description: analysis.extractedFields?.description || "",
+              category: analysis.extractedFields?.category || "",
+              estimatedValue: analysis.extractedFields?.estimatedValue || "",
+              submissionDeadline: analysis.extractedFields?.deadline || "",
+              technicalRequirements: analysis.extractedFields?.technicalRequirements || "",
+              eligibilityCriteria: analysis.extractedFields?.eligibilityCriteria || "",
+              contactEmail: analysis.extractedFields?.contactEmail || "",
+              location: analysis.extractedFields?.location || "",
+              duration: analysis.extractedFields?.duration || ""
+            };
+
+            setOcrResult({
+              extractedData,
+              confidence: analysis.complianceScore || 85,
+              documentType: analysis.documentType || "Tender Document",
+              processing: false,
+              completed: true
+            });
+
+            // Auto-fill form with extracted data
+            setFormData(prev => ({ ...prev, ...extractedData }));
+          } else {
+            throw new Error('OCR analysis failed');
+          }
+        } catch (error) {
+          console.error('Document analysis error:', error);
+          // Fallback to basic file processing
+          setOcrResult({
+            extractedData: {
+              title: file.name.replace(/\.[^/.]+$/, ""),
+              description: "Document uploaded successfully - please fill in the details manually"
+            },
+            confidence: 0,
+            documentType: "Unknown",
+            processing: false,
+            completed: true
+          });
+        }
       };
-
+      
+      reader.readAsText(file);
+    } catch (error) {
+      console.error('File processing error:', error);
       setOcrResult({
-        extractedData: mockExtractedData,
-        confidence: 92,
-        documentType: "Tender Notice",
+        extractedData: {},
+        confidence: 0,
+        documentType: "",
         processing: false,
-        completed: true
+        completed: false
       });
+    }
+  };
 
-      // Auto-fill form with extracted data
-      setFormData(prev => ({ ...prev, ...mockExtractedData }));
-    }, 3000);
+  const handleInputFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
   };
 
   const applyExtractedData = () => {
@@ -292,27 +364,42 @@ export default function TenderCreation() {
               <CardTitle>OCR Document Upload</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8">
-                <div className="text-center">
-                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <div className="space-y-2">
-                    <p className="text-lg font-medium">Upload Tender Document</p>
+              <div 
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                  dragActive 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('file-upload')?.click()}
+              >
+                <div className="space-y-4">
+                  <Upload className={`mx-auto h-12 w-12 ${dragActive ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                  <div>
+                    <h3 className="text-lg font-medium">
+                      {dragActive ? 'Drop file here' : 'Upload Tender Document'}
+                    </h3>
                     <p className="text-muted-foreground">
-                      Upload a PDF, image, or document file to extract tender information automatically
+                      Drag and drop files here, or click to browse
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Supports PDF, DOC, DOCX, JPG, PNG files up to 50MB
                     </p>
                   </div>
                   <div className="mt-4">
                     <Input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      onChange={handleFileUpload}
+                      onChange={handleInputFileChange}
                       className="hidden"
                       id="file-upload"
                     />
-                    <Button asChild variant="outline">
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        Select File
-                      </label>
+                    <Button variant="outline" className="pointer-events-none">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Choose Files
                     </Button>
                   </div>
                 </div>
