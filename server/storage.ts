@@ -1039,6 +1039,34 @@ export class DatabaseStorage implements IStorage {
   async getGemBidsByStatus(status: string): Promise<GemBid[]> {
     return await db.select().from(gemBids).where(eq(gemBids.status, status));
   }
+
+  // GeM Bid Stages operations
+  async getGemBidStages(bidId: number): Promise<GemBidStage[]> {
+    const result = await db.select().from(gemBidStages).where(eq(gemBidStages.gemBidId, bidId));
+    return result;
+  }
+
+  async updateGemBidStage(bidId: number, stageNumber: number, updates: Partial<InsertGemBidStage>): Promise<GemBidStage> {
+    const [existingStage] = await db
+      .select()
+      .from(gemBidStages)
+      .where(and(eq(gemBidStages.gemBidId, bidId), eq(gemBidStages.stageNumber, stageNumber)));
+
+    if (existingStage) {
+      const [updatedStage] = await db
+        .update(gemBidStages)
+        .set(updates)
+        .where(and(eq(gemBidStages.gemBidId, bidId), eq(gemBidStages.stageNumber, stageNumber)))
+        .returning();
+      return updatedStage;
+    } else {
+      const [newStage] = await db
+        .insert(gemBidStages)
+        .values({ gemBidId: bidId, stageNumber, ...updates })
+        .returning();
+      return newStage;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

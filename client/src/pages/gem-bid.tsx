@@ -481,7 +481,7 @@ export default function GemBid() {
         <div>
           <h1 className="text-3xl font-bold">GEM Bid Management</h1>
           <p className="text-muted-foreground">
-            Manage and track Government e-Marketplace bids
+            Manage and track Government e-Marketplace bids with 14-stage lifecycle
           </p>
         </div>
         <div className="flex items-center space-x-2">

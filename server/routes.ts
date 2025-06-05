@@ -2592,6 +2592,38 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // GeM Bid Stages routes
+  app.get('/api/gem-bids/:id/stages', async (req, res) => {
+    try {
+      const bidId = parseInt(req.params.id);
+      const stages = await storage.getGemBidStages(bidId);
+      res.json(stages);
+    } catch (error) {
+      console.error('Error fetching gem bid stages:', error);
+      res.status(500).json({ message: 'Failed to fetch gem bid stages' });
+    }
+  });
+
+  app.put('/api/gem-bids/:id/stages/:stageNumber', async (req, res) => {
+    try {
+      const bidId = parseInt(req.params.id);
+      const stageNumber = parseInt(req.params.stageNumber);
+      const { status, notes } = req.body;
+      
+      const updatedStage = await storage.updateGemBidStage(bidId, stageNumber, {
+        status,
+        notes,
+        completedAt: status === 'completed' ? new Date().toISOString() : undefined,
+        startedAt: status === 'in_progress' ? new Date().toISOString() : undefined
+      });
+      
+      res.json(updatedStage);
+    } catch (error) {
+      console.error('Error updating gem bid stage:', error);
+      res.status(500).json({ message: 'Failed to update gem bid stage' });
+    }
+  });
+
   app.get("/api/gem-bid-categories", async (req, res) => {
     try {
       const categories = [
