@@ -62,6 +62,19 @@ interface SystemConfig {
   maintenanceMode: boolean;
 }
 
+interface AIConfig {
+  anthropicApiKey: string;
+  openaiApiKey: string;
+  claudeModel: string;
+  gptModel: string;
+  enableDocumentAnalysis: boolean;
+  enableRiskAssessment: boolean;
+  enableBidOptimization: boolean;
+  enableComplianceCheck: boolean;
+  maxAnalysisFileSize: number;
+  analysisTimeout: number;
+}
+
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("users");
   const [selectedUser, setSelectedUser] = useState<SystemUser | null>(null);

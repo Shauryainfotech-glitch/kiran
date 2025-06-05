@@ -46,6 +46,12 @@ export default function AISuite() {
   const [analysisText, setAnalysisText] = useState("");
   const [activeAnalysis, setActiveAnalysis] = useState<AIAnalysis | null>(null);
 
+  // Fetch AI configuration status
+  const { data: aiStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ["/api/ai/status"],
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
   // Mock AI analysis data - in production this would come from AI services
   const riskAssessments: RiskAssessment[] = [
     {
@@ -139,7 +145,7 @@ export default function AISuite() {
     }
   };
 
-  const handleAnalyzeDocument = () => {
+  const handleAnalyzeDocument = async () => {
     if (!uploadedFile) return;
     
     const newAnalysis: AIAnalysis = {
@@ -152,35 +158,69 @@ export default function AISuite() {
     
     setActiveAnalysis(newAnalysis);
     
-    // Simulate AI processing
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 20;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
+    try {
+      // Convert file to text for Claude analysis
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const documentText = e.target?.result as string;
+        
         setActiveAnalysis({
           ...newAnalysis,
-          status: "completed",
-          progress: 100,
-          results: {
-            confidence: 0.92,
-            extractedFields: 15,
-            issues: 2,
-            keyInsights: [
-              "All mandatory fields detected",
-              "Minor formatting inconsistencies found",
-              "Compliance score: 94%"
-            ]
-          }
+          progress: 25
         });
-      } else {
+
+        // Call Claude API for document analysis
+        const response = await fetch('/api/ai/claude/analyze-document', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentText })
+        });
+
         setActiveAnalysis({
           ...newAnalysis,
-          progress: Math.min(progress, 100)
+          progress: 75
         });
-      }
-    }, 500);
+
+        if (response.ok) {
+          const analysis = await response.json();
+          setActiveAnalysis({
+            ...newAnalysis,
+            status: "completed",
+            progress: 100,
+            results: {
+              confidence: analysis.complianceScore / 100,
+              extractedFields: analysis.keyRequirements?.length || 0,
+              issues: analysis.riskFactors?.length || 0,
+              keyInsights: analysis.recommendations || ["Claude analysis completed"],
+              claudeAnalysis: analysis
+            }
+          });
+        } else {
+          const error = await response.json();
+          setActiveAnalysis({
+            ...newAnalysis,
+            status: "failed",
+            progress: 0,
+            results: {
+              error: error.message || "Analysis failed",
+              keyInsights: ["Claude API configuration required", "Please check ANTHROPIC_API_KEY in admin settings"]
+            }
+          });
+        }
+      };
+      
+      reader.readAsText(uploadedFile);
+    } catch (error: any) {
+      setActiveAnalysis({
+        ...newAnalysis,
+        status: "failed",
+        progress: 0,
+        results: {
+          error: error.message,
+          keyInsights: ["AI service configuration required", "Please provide ANTHROPIC_API_KEY"]
+        }
+      });
+    }
   };
 
   const getRiskLevelColor = (level: string) => {
@@ -212,6 +252,70 @@ export default function AISuite() {
           </Button>
         </div>
       </div>
+
+      {/* AI Configuration Status Console */}
+      {!statusLoading && aiStatus && (
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Bot className="h-5 w-5 mr-2" />
+              AI LLM Configuration Console
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg ${aiStatus.anthropic?.configured ? 'bg-green-100' : 'bg-red-100'}`}>
+                      <Brain className={`h-4 w-4 ${aiStatus.anthropic?.configured ? 'text-green-600' : 'text-red-600'}`} />
+                    </div>
+                    <div>
+                      <p className="font-medium">Claude Sonnet 4</p>
+                      <p className="text-sm text-muted-foreground">{aiStatus.anthropic?.model}</p>
+                    </div>
+                  </div>
+                  <Badge variant={aiStatus.anthropic?.configured ? "default" : "destructive"}>
+                    {aiStatus.anthropic?.status === "ready" ? "Ready" : "API Key Missing"}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg ${aiStatus.openai?.configured ? 'bg-green-100' : 'bg-red-100'}`}>
+                      <Sparkles className={`h-4 w-4 ${aiStatus.openai?.configured ? 'text-green-600' : 'text-red-600'}`} />
+                    </div>
+                    <div>
+                      <p className="font-medium">GPT-4o</p>
+                      <p className="text-sm text-muted-foreground">{aiStatus.openai?.model}</p>
+                    </div>
+                  </div>
+                  <Badge variant={aiStatus.openai?.configured ? "default" : "destructive"}>
+                    {aiStatus.openai?.status === "ready" ? "Ready" : "API Key Missing"}
+                  </Badge>
+                </div>
+              </div>
+              
+              {aiStatus.recommendations?.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm">Configuration Required:</h4>
+                  <div className="space-y-2">
+                    {aiStatus.recommendations.map((rec: string, index: number) => (
+                      <div key={index} className="flex items-center space-x-2 text-sm text-orange-700 bg-orange-50 p-2 rounded">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span>{rec}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => window.location.href = '/admin-settings'}>
+                    Configure API Keys
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* AI Insights Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

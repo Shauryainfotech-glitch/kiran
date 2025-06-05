@@ -392,6 +392,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Claude endpoints
+  app.post("/api/ai/claude/analyze-document", async (req, res) => {
+    try {
+      const { documentText } = req.body;
+      
+      if (!documentText) {
+        return res.status(400).json({ message: "Document text is required" });
+      }
+
+      const { analyzeTenderDocument } = await import("./claude");
+      const analysis = await analyzeTenderDocument(documentText);
+      
+      res.json(analysis);
+    } catch (error: any) {
+      console.error("Claude document analysis error:", error);
+      if (error.message.includes("API key")) {
+        res.status(401).json({ 
+          message: "ANTHROPIC_API_KEY not configured. Please add it in Admin Settings.",
+          requiresApiKey: true 
+        });
+      } else {
+        res.status(500).json({ message: "Document analysis failed", error: error.message });
+      }
+    }
+  });
+
+  app.post("/api/ai/claude/optimize-bid", async (req, res) => {
+    try {
+      const { tenderDetails, competitorData } = req.body;
+      
+      const { optimizeBidStrategy } = await import("./claude");
+      const optimization = await optimizeBidStrategy(tenderDetails, competitorData || []);
+      
+      res.json(optimization);
+    } catch (error: any) {
+      console.error("Claude bid optimization error:", error);
+      if (error.message.includes("API key")) {
+        res.status(401).json({ 
+          message: "ANTHROPIC_API_KEY not configured. Please add it in Admin Settings.",
+          requiresApiKey: true 
+        });
+      } else {
+        res.status(500).json({ message: "Bid optimization failed", error: error.message });
+      }
+    }
+  });
+
+  app.post("/api/ai/claude/assess-risk", async (req, res) => {
+    try {
+      const { tenderData } = req.body;
+      
+      const { assessTenderRisk } = await import("./claude");
+      const riskAssessment = await assessTenderRisk(tenderData);
+      
+      res.json(riskAssessment);
+    } catch (error: any) {
+      console.error("Claude risk assessment error:", error);
+      if (error.message.includes("API key")) {
+        res.status(401).json({ 
+          message: "ANTHROPIC_API_KEY not configured. Please add it in Admin Settings.",
+          requiresApiKey: true 
+        });
+      } else {
+        res.status(500).json({ message: "Risk assessment failed", error: error.message });
+      }
+    }
+  });
+
+  app.post("/api/ai/claude/check-compliance", async (req, res) => {
+    try {
+      const { documentContent, regulations } = req.body;
+      
+      const { checkCompliance } = await import("./claude");
+      const complianceCheck = await checkCompliance(documentContent, regulations || []);
+      
+      res.json(complianceCheck);
+    } catch (error: any) {
+      console.error("Claude compliance check error:", error);
+      if (error.message.includes("API key")) {
+        res.status(401).json({ 
+          message: "ANTHROPIC_API_KEY not configured. Please add it in Admin Settings.",
+          requiresApiKey: true 
+        });
+      } else {
+        res.status(500).json({ message: "Compliance check failed", error: error.message });
+      }
+    }
+  });
+
+  app.post("/api/ai/claude/generate-response", async (req, res) => {
+    try {
+      const { tenderRequirements, companyProfile } = req.body;
+      
+      const { generateTenderResponse } = await import("./claude");
+      const response = await generateTenderResponse(tenderRequirements, companyProfile);
+      
+      res.json(response);
+    } catch (error: any) {
+      console.error("Claude response generation error:", error);
+      if (error.message.includes("API key")) {
+        res.status(401).json({ 
+          message: "ANTHROPIC_API_KEY not configured. Please add it in Admin Settings.",
+          requiresApiKey: true 
+        });
+      } else {
+        res.status(500).json({ message: "Response generation failed", error: error.message });
+      }
+    }
+  });
+
+  app.post("/api/ai/claude/summarize", async (req, res) => {
+    try {
+      const { documentText } = req.body;
+      
+      const { summarizeTenderDocument } = await import("./claude");
+      const summary = await summarizeTenderDocument(documentText);
+      
+      res.json({ summary });
+    } catch (error: any) {
+      console.error("Claude summarization error:", error);
+      if (error.message.includes("API key")) {
+        res.status(401).json({ 
+          message: "ANTHROPIC_API_KEY not configured. Please add it in Admin Settings.",
+          requiresApiKey: true 
+        });
+      } else {
+        res.status(500).json({ message: "Summarization failed", error: error.message });
+      }
+    }
+  });
+
+  // AI configuration status endpoint
+  app.get("/api/ai/status", async (req, res) => {
+    try {
+      const anthropicConfigured = !!process.env.ANTHROPIC_API_KEY;
+      const openaiConfigured = !!process.env.OPENAI_API_KEY;
+      
+      res.json({
+        anthropic: {
+          configured: anthropicConfigured,
+          model: "claude-sonnet-4-20250514",
+          status: anthropicConfigured ? "ready" : "missing_api_key"
+        },
+        openai: {
+          configured: openaiConfigured,
+          model: "gpt-4o",
+          status: openaiConfigured ? "ready" : "missing_api_key"
+        },
+        recommendations: [
+          ...(!anthropicConfigured ? ["Add ANTHROPIC_API_KEY for Claude AI features"] : []),
+          ...(!openaiConfigured ? ["Add OPENAI_API_KEY for GPT features"] : [])
+        ]
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to check AI status", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
