@@ -31,6 +31,8 @@ const navigationItems = [
   { href: "/mis", label: "MIS", icon: BarChart3 },
   { href: "/documents", label: "Document Management", icon: FileText },
   { href: "/firm-documents", label: "Firm Documents", icon: Building },
+  { href: "/document-analytics", label: "Document Analytics", icon: BarChart3 },
+  { href: "/bulk-operations", label: "Bulk Operations", icon: Settings },
   { href: "/task", label: "Task", icon: Users },
   { href: "/approvals", label: "Approval's", icon: CheckCircle },
   { href: "/settings", label: "Settings", icon: Settings },
