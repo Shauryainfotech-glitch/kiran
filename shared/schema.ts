@@ -115,6 +115,25 @@ export const insertTenderSchema = createInsertSchema(tenders).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  submissionDeadline: z.union([z.string(), z.date()]).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }),
+  openingDate: z.union([z.string(), z.date(), z.null()]).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }).optional(),
+  startDate: z.union([z.string(), z.date(), z.null()]).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }).optional(),
 });
 
 export const insertVendorSchema = createInsertSchema(vendors).omit({
