@@ -27,6 +27,7 @@ import DocumentAnalytics from "@/pages/document-analytics";
 import BulkOperations from "@/pages/bulk-operations";
 import DocumentIntegrations from "@/pages/document-integrations";
 import DocumentWorkflows from "@/pages/document-workflows";
+import ProjectManagement from "@/pages/project-management";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -65,6 +66,8 @@ function Router() {
       <Route path="/document-workflows" component={DocumentWorkflows} />
       <Route path="/task" component={TaskManagement} />
       <Route path="/approvals" component={TaskManagement} />
+      <Route path="/project-management" component={ProjectManagement} />
+      <Route path="/projects" component={ProjectManagement} />
       <Route path="/settings" component={Settings} />
       <Route path="/oem" component={OEMManagement} />
       <Route path="/utility" component={Settings} />
