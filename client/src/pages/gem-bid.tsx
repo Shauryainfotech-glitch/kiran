@@ -264,7 +264,11 @@ export default function GemBid() {
                 </div>
               )}
 
-              <form action={handleCreateGemBid} className="space-y-4">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                handleCreateGemBid(formData);
+              }} className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="title">Bid Title</Label>
@@ -290,13 +294,19 @@ export default function GemBid() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" placeholder="Detailed description of the bid" rows={3} />
+                  <Textarea 
+                    id="description" 
+                    name="description" 
+                    placeholder="Detailed description of the bid" 
+                    defaultValue={extractedData?.description || ""} 
+                    rows={3} 
+                  />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="category">Category</Label>
-                    <Select name="category" required>
+                    <Select name="category" defaultValue={extractedData?.category || ""} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -312,24 +322,41 @@ export default function GemBid() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="estimatedValue">Estimated Value</Label>
-                    <Input id="estimatedValue" name="estimatedValue" type="number" placeholder="0" />
+                    <Input 
+                      id="estimatedValue" 
+                      name="estimatedValue" 
+                      type="number" 
+                      placeholder="0" 
+                      defaultValue={extractedData?.estimatedValue || ""} 
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="deadline">Deadline</Label>
-                    <Input id="deadline" name="deadline" type="date" required />
+                    <Input 
+                      id="deadline" 
+                      name="deadline" 
+                      type="date" 
+                      defaultValue={extractedData?.deadline ? extractedData.deadline.split('T')[0] : ""} 
+                      required 
+                    />
                   </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
-                    <Input id="location" name="location" placeholder="Project location" />
+                    <Input 
+                      id="location" 
+                      name="location" 
+                      placeholder="Project location" 
+                      defaultValue={extractedData?.location || ""} 
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="priority">Priority</Label>
-                    <Select name="priority" defaultValue="medium">
+                    <Select name="priority" defaultValue={extractedData?.priority || "medium"}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>

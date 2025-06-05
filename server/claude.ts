@@ -251,3 +251,94 @@ export async function summarizeTenderDocument(documentText: string): Promise<str
     throw new Error("Failed to summarize document with Claude: " + error.message);
   }
 }
+
+export async function extractGemBidData(documentText: string): Promise<{
+  title?: string;
+  description?: string;
+  organization?: string;
+  category?: string;
+  estimatedValue?: number;
+  deadline?: string;
+  location?: string;
+  priority?: string;
+  requirements?: string[];
+  tags?: string[];
+  bidNumber?: string;
+  bidType?: string;
+  department?: string;
+  itemCategory?: string;
+  contractPeriod?: string;
+  evaluationMethod?: string;
+  technicalQualification?: string;
+  financialDocument?: boolean;
+  emdRequired?: boolean;
+  epbcRequired?: boolean;
+  msePurchasePreference?: boolean;
+}> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY not configured. Please provide your Claude API key in the admin settings.");
+  }
+
+  const prompt = `
+    Extract structured information from this tender document for Gem Bid creation. 
+    Analyze the document and provide the extracted data in JSON format:
+
+    ${documentText}
+
+    Extract the following fields if available:
+    - title: The main title or name of the tender/bid
+    - description: Brief description or summary of the project
+    - organization: Name of the procuring organization/entity
+    - category: Type of tender (infrastructure, technology, construction, consulting, supplies)
+    - estimatedValue: Financial value in numbers only (no currency symbols)
+    - deadline: Bid submission deadline in YYYY-MM-DD format
+    - location: Project location or delivery location
+    - priority: low, medium, or high based on urgency indicators
+    - requirements: Array of key requirements or specifications
+    - tags: Array of relevant keywords or categories
+    - bidNumber: Official bid/tender number if mentioned
+    - bidType: Type of bidding process
+    - department: Government department or ministry
+    - itemCategory: Specific category of items/services
+    - contractPeriod: Duration of the contract
+    - evaluationMethod: How bids will be evaluated
+    - technicalQualification: Technical requirements summary
+    - financialDocument: true if financial documents are required
+    - emdRequired: true if Earnest Money Deposit is required
+    - epbcRequired: true if EPBC is required
+    - msePurchasePreference: true if MSE purchase preference applies
+
+    Return only valid JSON with available fields. If a field cannot be determined, omit it from the response.
+  `;
+
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-20250514", // the newest Anthropic model is "claude-sonnet-4-20250514" which was released May 14, 2025. Use this by default unless user has already selected claude-3-7-sonnet-20250219
+      max_tokens: 1500,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const content = message.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response format from Claude');
+    }
+
+    const extractedData = JSON.parse(content.text);
+    return extractedData;
+  } catch (error) {
+    console.error('Failed to parse extracted data:', error);
+    // Return basic extracted information if JSON parsing fails
+    return {
+      title: "",
+      description: "",
+      organization: "",
+      category: "infrastructure",
+      estimatedValue: 0,
+      deadline: "",
+      location: "",
+      priority: "medium",
+      requirements: [],
+      tags: []
+    };
+  }
+}
