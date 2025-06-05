@@ -43,69 +43,8 @@ export default function TaskManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-  // Mock task data - in real app this would come from API
-  const taskData: TaskData[] = [
-    { 
-      id: 1,
-      tenderId: 6702, 
-      tenderName: "Purchase Of Open Gym In Outdoor Stadium, Gujarat An...", 
-      clientName: "Education Department", 
-      location: "Gujarat", 
-      dueDate: "07-04-2025 19:15", 
-      taskWork: "EMD", 
-      assigneeName: "Palak Shah", 
-      assignerName: "Palak Shah", 
-      createdDate: "04-04-2025 13:58", 
-      deadline: "07-04-2025 12:00", 
-      status: "Under Process",
-      priority: "high"
-    },
-    { 
-      id: 2,
-      tenderId: 6763, 
-      tenderName: "Supply Of Centrifuge Air Station (as Filter) New...", 
-      clientName: "South Central Railway", 
-      location: "Andhra Pradesh", 
-      dueDate: "17-04-2025 09:00", 
-      taskWork: "ABC Enterprise - Dealer Price", 
-      assigneeName: "Manish Aavanti", 
-      assignerName: "Manish Aavanti", 
-      createdDate: "07-04-2025 11:58", 
-      deadline: "12-04-2025 12:00", 
-      status: "Under Process",
-      priority: "medium"
-    },
-    {
-      id: 3,
-      tenderId: 6801,
-      tenderName: "IT Infrastructure Upgrade Project",
-      clientName: "Eastern Railway",
-      location: "West Bengal",
-      dueDate: "20-04-2025 10:00",
-      taskWork: "Technical Evaluation",
-      assigneeName: "Yogesh Gadhavi",
-      assignerName: "Admin",
-      createdDate: "08-04-2025 09:30",
-      deadline: "18-04-2025 17:00",
-      status: "Pending",
-      priority: "urgent"
-    },
-    {
-      id: 4,
-      tenderId: 6850,
-      tenderName: "Office Building Renovation Contract",
-      clientName: "Planning Department",
-      location: "Maharashtra",
-      dueDate: "25-04-2025 14:00",
-      taskWork: "Documentation Review",
-      assigneeName: "Vinisha Patel",
-      assignerName: "Palak Shah",
-      createdDate: "09-04-2025 11:15",
-      deadline: "22-04-2025 12:00",
-      status: "Completed",
-      priority: "low"
-    }
-  ];
+  // Task data will be fetched from API in production
+  const taskData: TaskData[] = [];
 
   const filteredTasks = taskData.filter(task => {
     const matchesSearch = 
