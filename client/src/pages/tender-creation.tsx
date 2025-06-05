@@ -342,7 +342,7 @@ export default function TenderCreation() {
           organizationName: "",
           documentFees: "",
           emdValue: "",
-          ownership: ""
+          ownership: "central"
         });
         setUploadedFile(null);
         setOcrResult({
