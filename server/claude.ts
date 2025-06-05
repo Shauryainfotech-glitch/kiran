@@ -21,7 +21,7 @@ export async function analyzeTenderDocument(documentText: string): Promise<{
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      system: `You are an expert tender analysis AI for the AVGC TENDER platform. Analyze tender documents and provide structured insights in JSON format with keys: "summary", "keyRequirements" (array), "estimatedComplexity" (low/medium/high), "complianceScore" (0-100), "riskFactors" (array), "recommendations" (array).`,
+      system: `You are an expert tender analysis AI for the TENDER247 platform. Analyze tender documents and provide structured insights in JSON format with keys: "summary", "keyRequirements" (array), "estimatedComplexity" (low/medium/high), "complianceScore" (0-100), "riskFactors" (array), "recommendations" (array).`,
       max_tokens: 2048,
       messages: [
         { role: 'user', content: `Analyze this tender document comprehensively:\n\n${documentText}` }
@@ -62,7 +62,7 @@ export async function optimizeBidStrategy(tenderDetails: any, competitorData: an
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      system: `You are a bid optimization expert for the AVGC TENDER platform. Analyze tender details and competitor data to provide optimal bidding strategy in JSON format with keys: "recommendedBidAmount" (number), "strategy" (string), "successProbability" (0-100), "competitiveAnalysis" (string), "pricingRecommendations" (array).`,
+      system: `You are a bid optimization expert for the TENDER247 platform. Analyze tender details and competitor data to provide optimal bidding strategy in JSON format with keys: "recommendedBidAmount" (number), "strategy" (string), "successProbability" (0-100), "competitiveAnalysis" (string), "pricingRecommendations" (array).`,
       max_tokens: 1024,
       messages: [
         { 
@@ -106,7 +106,7 @@ export async function assessTenderRisk(tenderData: any): Promise<{
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      system: `You are a risk assessment specialist for the AVGC TENDER platform. Evaluate tender risks comprehensively and provide assessment in JSON format with keys: "overallRisk" (low/medium/high/critical), "riskScore" (0-100), "financialRisks" (array), "technicalRisks" (array), "complianceRisks" (array), "mitigationStrategies" (array).`,
+      system: `You are a risk assessment specialist for the TENDER247 platform. Evaluate tender risks comprehensively and provide assessment in JSON format with keys: "overallRisk" (low/medium/high/critical), "riskScore" (0-100), "financialRisks" (array), "technicalRisks" (array), "complianceRisks" (array), "mitigationStrategies" (array).`,
       max_tokens: 1024,
       messages: [
         { 
@@ -151,7 +151,7 @@ export async function generateTenderResponse(tenderRequirements: string, company
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      system: `You are a tender response specialist for the AVGC TENDER platform. Generate comprehensive tender responses in JSON format with keys: "proposal", "technicalApproach", "timeline", "teamStructure", "qualityAssurance", "valueProposition".`,
+      system: `You are a tender response specialist for the TENDER247 platform. Generate comprehensive tender responses in JSON format with keys: "proposal", "technicalApproach", "timeline", "teamStructure", "qualityAssurance", "valueProposition".`,
       max_tokens: 2048,
       messages: [
         { 
