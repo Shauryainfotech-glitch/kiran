@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -215,6 +215,35 @@ export const approvals = pgTable("approvals", {
   comments: text("comments"),
 });
 
+export const gemBids = pgTable("gem_bids", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  organization: text("organization"),
+  category: text("category"),
+  estimatedValue: decimal("estimated_value", { precision: 15, scale: 2 }),
+  deadline: date("deadline"),
+  location: text("location"),
+  priority: text("priority").default("medium"),
+  requirements: text("requirements").array(),
+  tags: text("tags").array(),
+  bidNumber: text("bid_number"),
+  bidType: text("bid_type"),
+  department: text("department"),
+  itemCategory: text("item_category"),
+  contractPeriod: text("contract_period"),
+  evaluationMethod: text("evaluation_method"),
+  technicalQualification: text("technical_qualification"),
+  financialDocument: boolean("financial_document").default(false),
+  emdRequired: boolean("emd_required").default(false),
+  epbcRequired: boolean("epbc_required").default(false),
+  msePurchasePreference: boolean("mse_purchase_preference").default(false),
+  status: text("status").default("active"),
+  submissionCount: integer("submission_count").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
 });
@@ -289,6 +318,19 @@ export const insertDocumentCategorySchema = createInsertSchema(documentCategorie
 export const insertFirmDocumentSchema = createInsertSchema(firmDocuments).omit({
   id: true,
   uploadedAt: true,
+});
+
+export const insertGemBidSchema = createInsertSchema(gemBids).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  deadline: z.union([z.string(), z.date(), z.null()]).transform((val) => {
+    if (typeof val === 'string') {
+      return new Date(val);
+    }
+    return val;
+  }).optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
