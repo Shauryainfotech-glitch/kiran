@@ -72,11 +72,12 @@ export default function FirmDocuments() {
   // Fetch firm documents
   const { data: documents = [], isLoading: documentsLoading } = useQuery({
     queryKey: ["/api/firm-documents", selectedFirm, selectedCategory],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedFirm) params.append('firmId', selectedFirm.toString());
       if (selectedCategory) params.append('categoryId', selectedCategory.toString());
-      return apiRequest(`/api/firm-documents?${params.toString()}`);
+      const response = await apiRequest(`/api/firm-documents?${params.toString()}`);
+      return response.json();
     },
   });
 
