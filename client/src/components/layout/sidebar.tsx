@@ -17,7 +17,8 @@ import {
   DollarSign,
   Zap,
   Globe,
-  GitBranch
+  GitBranch,
+  Gem
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ const navigationItems = [
   { href: "/sales-dashboard", label: "Sales Dashboard", icon: TrendingUp },
   { href: "/finance-dashboard", label: "Finance Dashboard", icon: DollarSign },
   { href: "/tenders", label: "Tender", icon: FolderOpen },
+  { href: "/gem-bid", label: "Gem Bid", icon: Gem },
   { href: "/tender-result", label: "Tender Result", icon: TrendingUp },
   { href: "/analytics", label: "Analytics", icon: PieChart },
   { href: "/tasks", label: "Tender Task", icon: CheckCircle },
