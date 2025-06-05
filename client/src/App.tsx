@@ -26,6 +26,7 @@ import FirmDocuments from "@/pages/firm-documents";
 import DocumentAnalytics from "@/pages/document-analytics";
 import BulkOperations from "@/pages/bulk-operations";
 import DocumentIntegrations from "@/pages/document-integrations";
+import DocumentWorkflows from "@/pages/document-workflows";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {

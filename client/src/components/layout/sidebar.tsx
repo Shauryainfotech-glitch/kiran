@@ -15,7 +15,9 @@ import {
   TrendingUp,
   PieChart,
   DollarSign,
-  Zap
+  Zap,
+  Globe,
+  GitBranch
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +35,8 @@ const navigationItems = [
   { href: "/firm-documents", label: "Firm Documents", icon: Building },
   { href: "/document-analytics", label: "Document Analytics", icon: BarChart3 },
   { href: "/bulk-operations", label: "Bulk Operations", icon: Settings },
+  { href: "/document-integrations", label: "Document Integrations", icon: GitBranch },
+  { href: "/document-workflows", label: "Document Workflows", icon: GitBranch },
   { href: "/task", label: "Task", icon: Users },
   { href: "/approvals", label: "Approval's", icon: CheckCircle },
   { href: "/settings", label: "Settings", icon: Settings },
