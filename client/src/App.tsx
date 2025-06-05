@@ -60,6 +60,7 @@ function Router() {
       <Route path="/ai-suite" component={AISuite} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/tender-add" component={TenderCreation} />
+      <Route path="/tender-creation" component={TenderCreation} />
       <Route path="/admin-settings" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>

@@ -186,10 +186,29 @@ export default function TenderCreation() {
 
   const submitTender = async () => {
     try {
+      // Generate reference if not provided
+      const reference = formData.reference || `TND-${Date.now()}`;
+      
+      // Format data for database
+      const tenderData = {
+        title: formData.title,
+        reference: reference,
+        description: formData.description || null,
+        category: formData.category,
+        estimatedValue: formData.estimatedValue ? parseFloat(formData.estimatedValue) : null,
+        submissionDeadline: formData.submissionDeadline ? new Date(formData.submissionDeadline).toISOString() : new Date().toISOString(),
+        location: formData.location || null,
+        department: formData.department || null,
+        organizationName: formData.organizationName || null,
+        documentFees: formData.documentFees ? parseFloat(formData.documentFees) : null,
+        emdValue: formData.emdValue ? parseFloat(formData.emdValue) : null,
+        ownership: formData.ownership || null
+      };
+
       const response = await fetch('/api/tenders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(tenderData)
       });
 
       if (response.ok) {
@@ -209,9 +228,22 @@ export default function TenderCreation() {
           emdValue: "",
           ownership: ""
         });
+        setUploadedFile(null);
+        setOcrResult({
+          extractedData: {},
+          confidence: 0,
+          documentType: "",
+          processing: false,
+          completed: false
+        });
+      } else {
+        const errorData = await response.json();
+        console.error('Tender creation error:', errorData);
+        alert(`Failed to create tender: ${errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
-      alert('Failed to create tender');
+      console.error('Tender submission error:', error);
+      alert('Failed to create tender: Network error');
     }
   };
 
@@ -337,26 +369,52 @@ export default function TenderCreation() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="technicalRequirements">Technical Requirements</Label>
-                <Textarea
-                  id="technicalRequirements"
-                  value={formData.technicalRequirements}
-                  onChange={(e) => handleInputChange('technicalRequirements', e.target.value)}
-                  placeholder="Enter technical requirements and specifications"
-                  rows={3}
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="organizationName">Organization Name</Label>
+                  <Input
+                    id="organizationName"
+                    value={formData.organizationName}
+                    onChange={(e) => handleInputChange('organizationName', e.target.value)}
+                    placeholder="Enter organization name"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="eligibilityCriteria">Eligibility Criteria</Label>
-                <Textarea
-                  id="eligibilityCriteria"
-                  value={formData.eligibilityCriteria}
-                  onChange={(e) => handleInputChange('eligibilityCriteria', e.target.value)}
-                  placeholder="Enter eligibility criteria for bidders"
-                  rows={3}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="ownership">Ownership</Label>
+                  <Select value={formData.ownership} onValueChange={(value) => handleInputChange('ownership', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select ownership type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="central">Central Government</SelectItem>
+                      <SelectItem value="state">State Government</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="documentFees">Document Fees (₹)</Label>
+                  <Input
+                    id="documentFees"
+                    type="number"
+                    value={formData.documentFees}
+                    onChange={(e) => handleInputChange('documentFees', e.target.value)}
+                    placeholder="Enter document fees"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="emdValue">EMD Value (₹)</Label>
+                  <Input
+                    id="emdValue"
+                    type="number"
+                    value={formData.emdValue}
+                    onChange={(e) => handleInputChange('emdValue', e.target.value)}
+                    placeholder="Enter EMD value"
+                  />
+                </div>
               </div>
 
               <Button onClick={submitTender} className="w-full">
@@ -535,23 +593,22 @@ export default function TenderCreation() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="ocr-duration">Project Duration</Label>
+                    <Label htmlFor="ocr-reference">Reference Number</Label>
                     <Input
-                      id="ocr-duration"
-                      value={formData.duration}
-                      onChange={(e) => handleInputChange('duration', e.target.value)}
-                      placeholder="e.g., 12 months"
+                      id="ocr-reference"
+                      value={formData.reference}
+                      onChange={(e) => handleInputChange('reference', e.target.value)}
+                      placeholder="e.g., TND-2024-001"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="ocr-contactEmail">Contact Email</Label>
+                    <Label htmlFor="ocr-department">Department</Label>
                     <Input
-                      id="ocr-contactEmail"
-                      type="email"
-                      value={formData.contactEmail}
-                      onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                      placeholder="Enter contact email"
+                      id="ocr-department"
+                      value={formData.department}
+                      onChange={(e) => handleInputChange('department', e.target.value)}
+                      placeholder="Enter department name"
                     />
                   </div>
                 </div>
@@ -567,26 +624,52 @@ export default function TenderCreation() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="ocr-technicalRequirements">Technical Requirements</Label>
-                  <Textarea
-                    id="ocr-technicalRequirements"
-                    value={formData.technicalRequirements}
-                    onChange={(e) => handleInputChange('technicalRequirements', e.target.value)}
-                    placeholder="Enter technical requirements and specifications"
-                    rows={3}
-                  />
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="ocr-organizationName">Organization Name</Label>
+                    <Input
+                      id="ocr-organizationName"
+                      value={formData.organizationName}
+                      onChange={(e) => handleInputChange('organizationName', e.target.value)}
+                      placeholder="Enter organization name"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="ocr-eligibilityCriteria">Eligibility Criteria</Label>
-                  <Textarea
-                    id="ocr-eligibilityCriteria"
-                    value={formData.eligibilityCriteria}
-                    onChange={(e) => handleInputChange('eligibilityCriteria', e.target.value)}
-                    placeholder="Enter eligibility criteria for bidders"
-                    rows={3}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="ocr-ownership">Ownership</Label>
+                    <Select value={formData.ownership} onValueChange={(value) => handleInputChange('ownership', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select ownership type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="central">Central Government</SelectItem>
+                        <SelectItem value="state">State Government</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ocr-documentFees">Document Fees (₹)</Label>
+                    <Input
+                      id="ocr-documentFees"
+                      type="number"
+                      value={formData.documentFees}
+                      onChange={(e) => handleInputChange('documentFees', e.target.value)}
+                      placeholder="Enter document fees"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ocr-emdValue">EMD Value (₹)</Label>
+                    <Input
+                      id="ocr-emdValue"
+                      type="number"
+                      value={formData.emdValue}
+                      onChange={(e) => handleInputChange('emdValue', e.target.value)}
+                      placeholder="Enter EMD value"
+                    />
+                  </div>
                 </div>
 
                 <Button onClick={submitTender} className="w-full">
