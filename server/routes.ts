@@ -223,6 +223,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Claude AI Routes
+  app.post("/api/ai/claude/analyze-document", async (req, res) => {
+    try {
+      const { documentText } = req.body;
+      if (!documentText) {
+        return res.status(400).json({ message: "Document text is required" });
+      }
+      
+      const analysis = await claude.analyzeTenderDocument(documentText);
+      res.json(analysis);
+    } catch (error: any) {
+      console.error("Claude document analysis error:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze document with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/ai/claude/optimize-bid", async (req, res) => {
+    try {
+      const { tenderDetails, competitorData } = req.body;
+      if (!tenderDetails) {
+        return res.status(400).json({ message: "Tender details are required" });
+      }
+      
+      const optimization = await claude.optimizeBidStrategy(tenderDetails, competitorData || []);
+      res.json(optimization);
+    } catch (error: any) {
+      console.error("Claude bid optimization error:", error);
+      res.status(500).json({ 
+        message: "Failed to optimize bid with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/ai/claude/assess-risk", async (req, res) => {
+    try {
+      const { tenderData } = req.body;
+      if (!tenderData) {
+        return res.status(400).json({ message: "Tender data is required" });
+      }
+      
+      const riskAssessment = await claude.assessTenderRisk(tenderData);
+      res.json(riskAssessment);
+    } catch (error: any) {
+      console.error("Claude risk assessment error:", error);
+      res.status(500).json({ 
+        message: "Failed to assess risk with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/ai/claude/generate-response", async (req, res) => {
+    try {
+      const { tenderRequirements, companyProfile } = req.body;
+      if (!tenderRequirements) {
+        return res.status(400).json({ message: "Tender requirements are required" });
+      }
+      
+      const response = await claude.generateTenderResponse(tenderRequirements, companyProfile || {});
+      res.json(response);
+    } catch (error: any) {
+      console.error("Claude tender response error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate response with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/ai/claude/check-compliance", async (req, res) => {
+    try {
+      const { documentContent, regulations } = req.body;
+      if (!documentContent) {
+        return res.status(400).json({ message: "Document content is required" });
+      }
+      
+      const compliance = await claude.checkCompliance(documentContent, regulations || []);
+      res.json(compliance);
+    } catch (error: any) {
+      console.error("Claude compliance check error:", error);
+      res.status(500).json({ 
+        message: "Failed to check compliance with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/ai/claude/summarize", async (req, res) => {
+    try {
+      const { documentText } = req.body;
+      if (!documentText) {
+        return res.status(400).json({ message: "Document text is required" });
+      }
+      
+      const summary = await claude.summarizeTenderDocument(documentText);
+      res.json({ summary });
+    } catch (error: any) {
+      console.error("Claude summarization error:", error);
+      res.status(500).json({ 
+        message: "Failed to summarize document with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
