@@ -23,7 +23,27 @@ import {
   Download,
   Edit,
   Trash2,
-  CheckCircle
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Star,
+  MessageSquare,
+  History,
+  Share2,
+  Copy,
+  ExternalLink,
+  RefreshCw,
+  Filter as FilterIcon,
+  SortAsc,
+  Grid,
+  List,
+  Settings,
+  Bookmark,
+  Bell,
+  X,
+  ChevronDown,
+  ChevronUp,
+  ArrowUpDown
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -38,6 +58,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 // Define the GemBid interface
 interface GemBid {
@@ -88,6 +112,14 @@ export default function GemBid() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'manual' | 'ocr'>('manual');
   const [selectedBids, setSelectedBids] = useState<number[]>([]);
+  const [selectedBid, setSelectedBid] = useState<GemBid | null>(null);
+  const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [expandedCards, setExpandedCards] = useState<number[]>([]);
+  const [bookmarkedBids, setBookmarkedBids] = useState<number[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -158,7 +190,7 @@ export default function GemBid() {
         body: formData,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       // Pre-fill form with extracted data
       if (data.extractedData) {
         form.setValue('title', data.extractedData.title || '');
@@ -184,18 +216,86 @@ export default function GemBid() {
     },
   });
 
-  // Filter gem bids based on current filters
-  const filteredGemBids = Array.isArray(gemBids) ? gemBids.filter((bid: any) => {
-    const matchesSearch = bid.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         bid.organization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         bid.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || bid.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || bid.status === selectedStatus;
-    const matchesPriority = selectedPriority === 'all' || bid.priority === selectedPriority;
-    const matchesTab = activeTab === 'all' || bid.status === activeTab;
-    
-    return matchesSearch && matchesCategory && matchesStatus && matchesPriority && matchesTab;
-  }) : [];
+  // Update gem bid mutation
+  const updateGemBidMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<GemBidFormData> }) => {
+      return apiRequest(`/api/gem-bids/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
+      setIsEditMode(false);
+      setSelectedBid(null);
+      toast({
+        title: 'Success',
+        description: 'Gem bid updated successfully',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to update gem bid',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Delete gem bid mutation
+  const deleteGemBidMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/gem-bids/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
+      toast({
+        title: 'Success',
+        description: 'Gem bid deleted successfully',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete gem bid',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Filter and sort gem bids
+  const filteredAndSortedGemBids = Array.isArray(gemBids) ? gemBids
+    .filter((bid: any) => {
+      const matchesSearch = bid.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           bid.organization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           bid.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || bid.category === selectedCategory;
+      const matchesStatus = selectedStatus === 'all' || bid.status === selectedStatus;
+      const matchesPriority = selectedPriority === 'all' || bid.priority === selectedPriority;
+      const matchesTab = activeTab === 'all' || bid.status === activeTab;
+      
+      return matchesSearch && matchesCategory && matchesStatus && matchesPriority && matchesTab;
+    })
+    .sort((a: any, b: any) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      
+      if (sortBy === 'estimatedValue') {
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      if (sortBy === 'deadline' || sortBy === 'createdAt') {
+        const aDate = new Date(aValue);
+        const bDate = new Date(bValue);
+        return sortOrder === 'asc' ? aDate.getTime() - bDate.getTime() : bDate.getTime() - aDate.getTime();
+      }
+      
+      const aStr = String(aValue || '').toLowerCase();
+      const bStr = String(bValue || '').toLowerCase();
+      return sortOrder === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
+    }) : [];
 
   // Calculate analytics
   const analytics = {
@@ -219,17 +319,16 @@ export default function GemBid() {
     }
   };
 
-  // Bulk operations
+  // Enhanced handler functions
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedBids(filteredGemBids.map(bid => bid.id));
+      setSelectedBids(filteredAndSortedGemBids.map(bid => bid.id));
     } else {
       setSelectedBids([]);
     }
   };
 
   const handleBulkStatusUpdate = (newStatus: string) => {
-    // Implementation for bulk status update
     toast({
       title: 'Status Updated',
       description: `${selectedBids.length} bids updated to ${newStatus}`,
@@ -238,12 +337,76 @@ export default function GemBid() {
   };
 
   const handleBulkDelete = () => {
-    // Implementation for bulk delete
     toast({
       title: 'Bids Deleted',
       description: `${selectedBids.length} bids deleted successfully`,
     });
     setSelectedBids([]);
+  };
+
+  const handleViewDetails = (bid: GemBid) => {
+    setSelectedBid(bid);
+    setIsDetailViewOpen(true);
+  };
+
+  const handleEditBid = (bid: GemBid) => {
+    setSelectedBid(bid);
+    setIsEditMode(true);
+    form.reset({
+      title: bid.title,
+      description: bid.description,
+      organization: bid.organization,
+      category: bid.category,
+      estimatedValue: bid.estimatedValue,
+      deadline: bid.deadline,
+      location: bid.location,
+      priority: bid.priority,
+      requirements: bid.requirements?.join(', ') || '',
+      tags: bid.tags?.join(', ') || '',
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteBid = (id: number) => {
+    deleteGemBidMutation.mutate(id);
+  };
+
+  const toggleBookmark = (bidId: number) => {
+    setBookmarkedBids(prev => 
+      prev.includes(bidId) 
+        ? prev.filter(id => id !== bidId)
+        : [...prev, bidId]
+    );
+  };
+
+  const toggleCardExpansion = (bidId: number) => {
+    setExpandedCards(prev => 
+      prev.includes(bidId) 
+        ? prev.filter(id => id !== bidId)
+        : [...prev, bidId]
+    );
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const getTimeRemaining = (deadline: string) => {
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = deadlineDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return { text: 'Expired', color: 'text-red-500' };
+    if (diffDays === 0) return { text: 'Today', color: 'text-orange-500' };
+    if (diffDays === 1) return { text: '1 day left', color: 'text-orange-500' };
+    if (diffDays <= 7) return { text: `${diffDays} days left`, color: 'text-yellow-500' };
+    return { text: `${diffDays} days left`, color: 'text-green-500' };
   };
 
   // Helper functions for styling
@@ -645,7 +808,7 @@ export default function GemBid() {
                 <p className="text-muted-foreground">Loading gem bids...</p>
               </div>
             </div>
-          ) : filteredGemBids.length === 0 ? (
+          ) : filteredAndSortedGemBids.length === 0 ? (
             <Card>
               <CardContent className="flex items-center justify-center p-8">
                 <div className="text-center">
@@ -675,20 +838,95 @@ export default function GemBid() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {/* Bulk Actions Header */}
+              {/* Enhanced View Controls */}
               <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center space-x-4">
                   <Checkbox
-                    checked={selectedBids.length === filteredGemBids.length && filteredGemBids.length > 0}
+                    checked={selectedBids.length === filteredAndSortedGemBids.length && filteredAndSortedGemBids.length > 0}
                     onCheckedChange={handleSelectAll}
                   />
                   <span className="text-sm font-medium">
                     {selectedBids.length > 0 
-                      ? `${selectedBids.length} of ${filteredGemBids.length} selected`
-                      : `Select all ${filteredGemBids.length} bids`
+                      ? `${selectedBids.length} of ${filteredAndSortedGemBids.length} selected`
+                      : `Select all ${filteredAndSortedGemBids.length} bids`
                     }
                   </span>
                 </div>
+                
+                <div className="flex items-center space-x-2">
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center border rounded-md">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <Grid className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Sort Controls */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <ArrowUpDown className="w-4 h-4 mr-2" />
+                        Sort
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleSort('title')}>
+                        Title {sortBy === 'title' && (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleSort('deadline')}>
+                        Deadline {sortBy === 'deadline' && (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleSort('estimatedValue')}>
+                        Value {sortBy === 'estimatedValue' && (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleSort('priority')}>
+                        Priority {sortBy === 'priority' && (sortOrder === 'asc' ? '↑' : '↓')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              {/* Bulk Actions */}
+              {selectedBids.length > 0 && (
+                <div className="flex items-center justify-between p-4 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="text-sm font-medium text-primary">
+                    {selectedBids.length} bid{selectedBids.length > 1 ? 's' : ''} selected
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <Select onValueChange={handleBulkStatusUpdate}>
+                      <SelectTrigger className="w-36">
+                        <SelectValue placeholder="Change Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Set Active</SelectItem>
+                        <SelectItem value="draft">Set Draft</SelectItem>
+                        <SelectItem value="submitted">Set Submitted</SelectItem>
+                        <SelectItem value="closed">Set Closed</SelectItem>
+                        <SelectItem value="awarded">Set Awarded</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                      Delete ({selectedBids.length})
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Bids Grid/List */}
+              <div className={viewMode === 'grid' ? 'grid gap-4' : 'space-y-4'}>
+                {filteredAndSortedGemBids.map((bid) => {
                 
                 {selectedBids.length > 0 && (
                   <div className="flex items-center space-x-2">
@@ -708,11 +946,12 @@ export default function GemBid() {
                       Delete ({selectedBids.length})
                     </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="grid gap-4">
-                {filteredGemBids.map((bid) => (
+              {/* Bids Grid/List */}
+              <div className={viewMode === 'grid' ? 'grid gap-4' : 'space-y-4'}>
+                {filteredAndSortedGemBids.map((bid) => (
                   <Card key={bid.id} className={`hover:shadow-md transition-shadow ${
                     selectedBids.includes(bid.id) ? 'ring-2 ring-primary' : ''
                   }`}>
