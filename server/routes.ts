@@ -1036,6 +1036,357 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // Document Workflows API
+  app.get("/api/workflows", async (req, res) => {
+    try {
+      const workflows = [
+        {
+          id: "wf-001",
+          name: "Contract Review Process",
+          description: "Automated contract review and approval workflow",
+          status: "active",
+          trigger: "document_upload",
+          category: "legal",
+          priority: "high",
+          completionRate: 85,
+          avgProcessingTime: "2.5 days",
+          totalExecutions: 156,
+          activeInstances: 8,
+          lastRun: "2025-06-05T08:30:00Z",
+          createdBy: "Legal Team",
+          isActive: true,
+          conditions: "document_type=contract AND file_size<50MB",
+          actions: "ai_review,legal_approval,manager_sign_off,archive",
+          approvers: "legal_team,department_manager",
+          steps: [
+            { id: 1, name: "Document Upload", status: "completed", assignee: "System" },
+            { id: 2, name: "Legal Review", status: "in_progress", assignee: "John Doe" },
+            { id: 3, name: "Manager Approval", status: "pending", assignee: "Jane Smith" },
+            { id: 4, name: "Final Archive", status: "pending", assignee: "System" }
+          ]
+        },
+        {
+          id: "wf-002",
+          name: "Invoice Processing",
+          description: "Automated invoice validation and approval",
+          status: "active",
+          trigger: "document_type_invoice",
+          category: "finance",
+          priority: "medium",
+          completionRate: 92,
+          avgProcessingTime: "1.2 days",
+          totalExecutions: 234,
+          activeInstances: 12,
+          lastRun: "2025-06-05T09:15:00Z",
+          createdBy: "Finance Team",
+          isActive: true,
+          conditions: "amount<10000 AND vendor_verified=true",
+          actions: "validate_invoice,budget_check,approval,payment_process",
+          approvers: "finance_manager,cfo",
+          steps: [
+            { id: 1, name: "Invoice Validation", status: "completed", assignee: "AI System" },
+            { id: 2, name: "Budget Check", status: "completed", assignee: "System" },
+            { id: 3, name: "Approval", status: "in_progress", assignee: "CFO" },
+            { id: 4, name: "Payment Processing", status: "pending", assignee: "Accounts" }
+          ]
+        },
+        {
+          id: "wf-003",
+          name: "Compliance Audit",
+          description: "Quarterly compliance document audit workflow",
+          status: "paused",
+          trigger: "scheduled",
+          category: "compliance",
+          priority: "high",
+          completionRate: 78,
+          avgProcessingTime: "5.0 days",
+          totalExecutions: 45,
+          activeInstances: 0,
+          lastRun: "2025-06-01T00:00:00Z",
+          createdBy: "Compliance Team",
+          isActive: false,
+          conditions: "quarterly_schedule AND compliance_required=true",
+          actions: "collect_documents,audit_review,generate_report,management_review",
+          approvers: "compliance_officer,management_team",
+          steps: [
+            { id: 1, name: "Document Collection", status: "pending", assignee: "System" },
+            { id: 2, name: "Audit Review", status: "pending", assignee: "Auditor" },
+            { id: 3, name: "Report Generation", status: "pending", assignee: "System" },
+            { id: 4, name: "Management Review", status: "pending", assignee: "Management" }
+          ]
+        }
+      ];
+      res.json(workflows);
+    } catch (error) {
+      console.error("Error fetching workflows:", error);
+      res.status(500).json({ message: "Failed to fetch workflows" });
+    }
+  });
+
+  app.post("/api/workflows", async (req, res) => {
+    try {
+      const workflowData = req.body;
+      const newWorkflow = {
+        id: `wf-${Date.now()}`,
+        ...workflowData,
+        status: workflowData.isActive ? "active" : "paused",
+        completionRate: 0,
+        avgProcessingTime: "0 days",
+        totalExecutions: 0,
+        activeInstances: 0,
+        lastRun: null,
+        createdBy: "Current User",
+        createdAt: new Date().toISOString(),
+        steps: []
+      };
+      res.status(201).json(newWorkflow);
+    } catch (error) {
+      console.error("Error creating workflow:", error);
+      res.status(500).json({ message: "Failed to create workflow" });
+    }
+  });
+
+  app.post("/api/workflows/:id/pause", async (req, res) => {
+    try {
+      const { id } = req.params;
+      res.json({ message: "Workflow paused successfully", id });
+    } catch (error) {
+      console.error("Error pausing workflow:", error);
+      res.status(500).json({ message: "Failed to pause workflow" });
+    }
+  });
+
+  app.post("/api/workflows/:id/resume", async (req, res) => {
+    try {
+      const { id } = req.params;
+      res.json({ message: "Workflow resumed successfully", id });
+    } catch (error) {
+      console.error("Error resuming workflow:", error);
+      res.status(500).json({ message: "Failed to resume workflow" });
+    }
+  });
+
+  app.get("/api/workflow-instances", async (req, res) => {
+    try {
+      const instances = [
+        {
+          id: "inst-001",
+          workflowId: "wf-001",
+          documentId: "doc-123",
+          status: "in_progress",
+          progress: 60,
+          startedAt: "2025-06-05T08:00:00Z",
+          currentStep: "legal_review",
+          assignedTo: "john.doe@company.com"
+        },
+        {
+          id: "inst-002",
+          workflowId: "wf-002",
+          documentId: "doc-124",
+          status: "completed",
+          progress: 100,
+          startedAt: "2025-06-05T07:30:00Z",
+          completedAt: "2025-06-05T08:45:00Z",
+          currentStep: "completed"
+        },
+        {
+          id: "inst-003",
+          workflowId: "wf-001",
+          documentId: "doc-125",
+          status: "blocked",
+          progress: 40,
+          startedAt: "2025-06-04T14:20:00Z",
+          currentStep: "manager_approval",
+          assignedTo: "jane.smith@company.com"
+        }
+      ];
+      res.json(instances);
+    } catch (error) {
+      console.error("Error fetching workflow instances:", error);
+      res.status(500).json({ message: "Failed to fetch workflow instances" });
+    }
+  });
+
+  // Document Integrations API
+  app.get("/api/integrations", async (req, res) => {
+    try {
+      const integrations = [
+        {
+          id: "google-drive",
+          name: "Google Drive",
+          description: "Sync documents with Google Drive for backup and collaboration",
+          category: "cloud_storage",
+          status: "active",
+          icon: "drive",
+          lastSync: "2025-06-05T10:30:00Z",
+          documentsCount: 156,
+          settings: {
+            autoSync: true,
+            syncFrequency: "hourly",
+            folderId: "1A2B3C4D5E6F7G8H9I0J"
+          }
+        },
+        {
+          id: "dropbox",
+          name: "Dropbox",
+          description: "Cloud storage and file synchronization service",
+          category: "cloud_storage",
+          status: "configured",
+          icon: "dropbox",
+          lastSync: "2025-06-05T09:45:00Z",
+          documentsCount: 89,
+          settings: {
+            autoSync: false,
+            syncFrequency: "daily",
+            folderId: "/TenderDocuments"
+          }
+        },
+        {
+          id: "slack",
+          name: "Slack",
+          description: "Real-time notifications and team communication",
+          category: "communication",
+          status: "active",
+          icon: "slack",
+          lastNotification: "2025-06-05T11:15:00Z",
+          notificationsSent: 42,
+          settings: {
+            channel: "#document-alerts",
+            webhookUrl: "https://hooks.slack.com/services/...",
+            notifications: ["upload", "approval", "deadline"]
+          }
+        },
+        {
+          id: "email",
+          name: "Email Notifications",
+          description: "Email alerts for document workflow events",
+          category: "communication",
+          status: "active",
+          icon: "mail",
+          lastEmail: "2025-06-05T10:50:00Z",
+          emailsSent: 127,
+          settings: {
+            smtpServer: "smtp.company.com",
+            fromAddress: "documents@company.com",
+            notifications: ["approval_required", "deadline_warning", "completion"]
+          }
+        },
+        {
+          id: "sms",
+          name: "SMS Alerts",
+          description: "SMS notifications via Twilio for urgent alerts",
+          category: "communication",
+          status: "configured",
+          icon: "phone",
+          lastSMS: "2025-06-05T08:30:00Z",
+          smsSent: 15,
+          settings: {
+            provider: "twilio",
+            fromNumber: "+1234567890",
+            urgentOnly: true
+          }
+        },
+        {
+          id: "claude-ai",
+          name: "Claude AI",
+          description: "Document analysis and intelligent processing",
+          category: "ai_analytics",
+          status: "active",
+          icon: "brain",
+          lastAnalysis: "2025-06-05T11:00:00Z",
+          documentsAnalyzed: 234,
+          settings: {
+            autoAnalysis: true,
+            confidence: 0.85,
+            features: ["extraction", "classification", "summarization"]
+          }
+        },
+        {
+          id: "openai",
+          name: "OpenAI GPT",
+          description: "Advanced AI processing and content generation",
+          category: "ai_analytics",
+          status: "configured",
+          icon: "openai",
+          lastAnalysis: "2025-06-05T10:20:00Z",
+          documentsAnalyzed: 156,
+          settings: {
+            model: "gpt-4o",
+            temperature: 0.3,
+            features: ["generation", "analysis", "translation"]
+          }
+        },
+        {
+          id: "blockchain",
+          name: "Blockchain Verification",
+          description: "Document integrity verification using blockchain",
+          category: "security",
+          status: "active",
+          icon: "shield",
+          lastVerification: "2025-06-05T11:10:00Z",
+          documentsVerified: 89,
+          settings: {
+            network: "ethereum",
+            hashAlgorithm: "SHA-256",
+            autoVerify: true
+          }
+        },
+        {
+          id: "webhook",
+          name: "Webhook API",
+          description: "Custom webhook integrations for external systems",
+          category: "api",
+          status: "configured",
+          icon: "link",
+          lastWebhook: "2025-06-05T09:30:00Z",
+          webhooksCalled: 67,
+          settings: {
+            endpoints: [
+              "https://api.company.com/documents/webhook",
+              "https://erp.company.com/integration/documents"
+            ],
+            events: ["upload", "approval", "workflow_complete"]
+          }
+        }
+      ];
+      res.json(integrations);
+    } catch (error) {
+      console.error("Error fetching integrations:", error);
+      res.status(500).json({ message: "Failed to fetch integrations" });
+    }
+  });
+
+  app.post("/api/integrations/:id/configure", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const settings = req.body;
+      console.log(`Configuring integration ${id}:`, settings);
+      res.json({ message: "Integration configured successfully", id, settings });
+    } catch (error) {
+      console.error("Error configuring integration:", error);
+      res.status(500).json({ message: "Failed to configure integration" });
+    }
+  });
+
+  app.post("/api/integrations/:id/test", async (req, res) => {
+    try {
+      const { id } = req.params;
+      // Simulate test connection
+      const testResult = {
+        success: true,
+        message: "Integration test successful",
+        details: {
+          responseTime: Math.floor(Math.random() * 500) + 100,
+          timestamp: new Date().toISOString()
+        }
+      };
+      res.json(testResult);
+    } catch (error) {
+      console.error("Error testing integration:", error);
+      res.status(500).json({ message: "Failed to test integration" });
+    }
+  });
+
   // Firm Documents management routes
   app.get("/api/firm-documents", async (req, res) => {
     try {
