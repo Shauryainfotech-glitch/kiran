@@ -45,11 +45,12 @@ export default function DocumentAnalytics() {
   // Fetch analytics data
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ["/api/document-analytics", selectedPeriod, selectedFirm],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       params.append('period', selectedPeriod);
       if (selectedFirm !== "all") params.append('firmId', selectedFirm);
-      return apiRequest(`/api/document-analytics?${params.toString()}`);
+      const response = await apiRequest(`/api/document-analytics?${params.toString()}`);
+      return response.json();
     },
   });
 
@@ -104,7 +105,8 @@ export default function DocumentAnalytics() {
     ]
   };
 
-  const data = analyticsData || mockAnalytics;
+  // Ensure data has proper structure and fallback safely
+  const data = analyticsData && analyticsData.overview ? analyticsData : mockAnalytics;
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
