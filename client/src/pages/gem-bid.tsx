@@ -15,6 +15,7 @@ import {
   Building2, Trophy, Target, TrendingUp, Upload, 
   Scan, Brain, File
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
@@ -49,6 +50,10 @@ export default function GemBid() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [extractedData, setExtractedData] = useState<any>(null);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [selectedBids, setSelectedBids] = useState<number[]>([]);
+  const [sortBy, setSortBy] = useState<"deadline" | "value" | "created" | "priority">("deadline");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { toast } = useToast();
 
   const { data: gemBids, isLoading } = useQuery({
@@ -176,8 +181,132 @@ export default function GemBid() {
     createGemBidMutation.mutate(gemBidData);
   };
 
+  // Analytics calculations
+  const totalBids = gemBids?.length || 0;
+  const activeBids = gemBids?.filter(bid => bid.status === 'active').length || 0;
+  const totalValue = gemBids?.reduce((sum, bid) => sum + (parseFloat(bid.estimatedValue) || 0), 0) || 0;
+  const averageValue = totalBids > 0 ? totalValue / totalBids : 0;
+
+  // Bulk operations handlers
+  const handleSelectAll = () => {
+    if (selectedBids.length === filteredGemBids.length) {
+      setSelectedBids([]);
+    } else {
+      setSelectedBids(filteredGemBids.map(bid => bid.id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedBids.length === 0) return;
+    
+    try {
+      await Promise.all(selectedBids.map(id => 
+        apiRequest(`/api/gem-bids/${id}`, { method: 'DELETE' })
+      ));
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
+      setSelectedBids([]);
+      toast({
+        title: "Success",
+        description: `${selectedBids.length} bids deleted successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete selected bids",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBulkStatusUpdate = async (newStatus: string) => {
+    if (selectedBids.length === 0) return;
+    
+    try {
+      await Promise.all(selectedBids.map(id => 
+        apiRequest(`/api/gem-bids/${id}`, { 
+          method: 'PUT',
+          body: JSON.stringify({ status: newStatus }),
+          headers: { 'Content-Type': 'application/json' }
+        })
+      ));
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
+      setSelectedBids([]);
+      toast({
+        title: "Success",
+        description: `${selectedBids.length} bids updated to ${newStatus}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update selected bids",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Analytics Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Total Bids</p>
+                <p className="text-2xl font-bold">{totalBids}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Target className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Active Bids</p>
+                <p className="text-2xl font-bold">{activeBids}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <DollarSign className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                <p className="text-2xl font-bold">₹{(totalValue / 1000000).toFixed(1)}M</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Avg Value</p>
+                <p className="text-2xl font-bold">₹{(averageValue / 100000).toFixed(1)}L</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -187,6 +316,30 @@ export default function GemBid() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {selectedBids.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <Badge variant="secondary">{selectedBids.length} selected</Badge>
+              <Select onValueChange={handleBulkStatusUpdate}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Set Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="awarded">Awarded</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                Delete Selected
+              </Button>
+            </div>
+          )}
+          <Button variant="outline" size="sm">
+            <Download className="w-4 h-4 mr-2" />
+            Export Data
+          </Button>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
