@@ -130,31 +130,7 @@ export default function AISuite() {
     }
   ];
 
-  const recentAnalyses: AIAnalysis[] = [
-    {
-      id: "1",
-      type: "document",
-      status: "completed",
-      progress: 100,
-      createdAt: "2025-04-08T10:30:00Z",
-      results: { confidence: 0.95, extractedFields: 12, issues: 1 }
-    },
-    {
-      id: "2", 
-      type: "risk",
-      status: "completed",
-      progress: 100,
-      createdAt: "2025-04-08T09:15:00Z",
-      results: { overallRisk: "medium", criticalIssues: 2 }
-    },
-    {
-      id: "3",
-      type: "prediction",
-      status: "processing",
-      progress: 73,
-      createdAt: "2025-04-08T11:00:00Z"
-    }
-  ];
+  const recentAnalyses: AIAnalysis[] = [];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

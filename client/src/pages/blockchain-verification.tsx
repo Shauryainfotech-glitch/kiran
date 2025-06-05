@@ -47,64 +47,9 @@ interface VerificationRequest {
 }
 
 export default function BlockchainVerification() {
-  const [verificationRequests, setVerificationRequests] = useState<VerificationRequest[]>([
-    {
-      id: "1",
-      documentName: "Technical_Proposal_IT_Infrastructure.pdf",
-      fileSize: 2048576,
-      uploadedAt: "2025-04-08T10:30:00Z",
-      status: "verified",
-      progress: 100,
-      blockchainHash: "0x4a7b2c9e8f1d3a5b6c8e9f2a4d6b8c1e3f5a7b9c2e4d6f8a1c3e5b7d9f2a4c6e8"
-    },
-    {
-      id: "2", 
-      documentName: "Financial_Bid_Gym_Equipment.pdf",
-      fileSize: 1524288,
-      uploadedAt: "2025-04-08T11:15:00Z",
-      status: "processing",
-      progress: 73,
-    }
-  ]);
+  const [verificationRequests, setVerificationRequests] = useState<VerificationRequest[]>([]);
 
-  const blockchainRecords: BlockchainRecord[] = [
-    {
-      id: "1",
-      documentId: "DOC_001",
-      documentName: "Technical_Proposal_IT_Infrastructure.pdf",
-      hash: "sha256:4a7b2c9e8f1d3a5b6c8e9f2a4d6b8c1e3f5a7b9c2e4d6f8a1c3e5b7d9f2a4c6e8",
-      blockHash: "0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
-      transactionId: "0x4a7b2c9e8f1d3a5b6c8e9f2a4d6b8c1e3f5a7b9c2e4d6f8a1c3e5b7d9f2a4c6e8",
-      timestamp: "2025-04-08T10:32:15Z",
-      status: "verified",
-      verificationScore: 100,
-      immutableSignature: "sig_1A2B3C4D5E6F7G8H9I0J"
-    },
-    {
-      id: "2",
-      documentId: "DOC_002", 
-      documentName: "Vendor_Registration_BuildPro.pdf",
-      hash: "sha256:7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a",
-      blockHash: "0x00000000001a6b25f5c8c7d45a27a5f5b5e5d5c5b5a59e5f5a5b5c5d5e5f5a5b5c",
-      transactionId: "0x7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a",
-      timestamp: "2025-04-07T15:45:30Z",
-      status: "verified",
-      verificationScore: 100,
-      immutableSignature: "sig_2B3C4D5E6F7G8H9I0J1K"
-    },
-    {
-      id: "3",
-      documentId: "DOC_003",
-      documentName: "Compliance_Certificate_Railway.pdf", 
-      hash: "sha256:9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
-      blockHash: "0x00000000002b7c36f6d9d8e56b38b6f6c6f6e6d6c6b6ae6f6b6c6d6e6f6b6c6d",
-      transactionId: "0x9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
-      timestamp: "2025-04-06T09:20:45Z",
-      status: "verified", 
-      verificationScore: 98,
-      immutableSignature: "sig_3C4D5E6F7G8H9I0J1K2L"
-    }
-  ];
+  const blockchainRecords: BlockchainRecord[] = [];
 
   const networkStats = {
     totalBlocks: 1247856,
