@@ -776,6 +776,24 @@ export default function GemBid() {
         </div>
       </div>
 
+      {/* GeM Bid Stages Demo */}
+      <Card>
+        <CardHeader>
+          <CardTitle>14-Stage GeM Bid Lifecycle Demo</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Experience the comprehensive bid management system with kanban, list, and timeline views
+          </p>
+        </CardHeader>
+        <CardContent>
+          <GemBidStages 
+            gemBidId={1} 
+            currentStage={3} 
+            viewMode={stageViewMode} 
+            onViewModeChange={setStageViewMode} 
+          />
+        </CardContent>
+      </Card>
+
       {/* Filters and Search */}
       <Card>
         <CardContent className="p-4">

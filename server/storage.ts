@@ -8,6 +8,7 @@ import {
   documentCategories,
   firmDocuments,
   gemBids,
+  gemBidStages,
   type User, 
   type InsertUser,
   type Tender,
@@ -25,10 +26,12 @@ import {
   type FirmDocument,
   type InsertFirmDocument,
   type GemBid,
-  type InsertGemBid
+  type InsertGemBid,
+  type GemBidStage,
+  type InsertGemBidStage
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, like, and, or, count, asc } from 'drizzle-orm';
 
 export interface IStorage {
   // Users
