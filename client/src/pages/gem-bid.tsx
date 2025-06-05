@@ -56,6 +56,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import GemBidStages from '@/components/gem-bid/gem-bid-stages';
 
 // Define the GemBid interface
 interface GemBid {
@@ -74,6 +75,7 @@ interface GemBid {
   createdAt: string;
   priority: 'low' | 'medium' | 'high';
   tags: string[];
+  currentStage?: number;
 }
 
 // Zod schema for form validation
@@ -127,6 +129,7 @@ export default function GemBid() {
   const [tags, setTags] = useState<string[]>(['']);
   const [newRequirement, setNewRequirement] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [stageViewMode, setStageViewMode] = useState<'kanban' | 'list' | 'timeline'>('kanban');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
