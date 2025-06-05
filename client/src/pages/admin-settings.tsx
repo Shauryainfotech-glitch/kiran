@@ -65,8 +65,8 @@ export default function AdminSettings() {
   const systemUsers: SystemUser[] = [];
 
   const systemConfig: SystemConfig = {
-    siteName: "TenderAI Pro",
-    siteUrl: "https://tenderai.example.com",
+    siteName: "AVGC TENDER",
+    siteUrl: "https://avgctender.company.com",
     adminEmail: "admin@company.com",
     timezone: "Asia/Kolkata",
     dateFormat: "DD/MM/YYYY",
@@ -318,7 +318,7 @@ export default function AdminSettings() {
                     id="siteName"
                     value={config.siteName}
                     onChange={(e) => handleConfigChange('siteName', e.target.value)}
-                    placeholder="TenderAI Pro"
+                    placeholder="AVGC TENDER"
                   />
                 </div>
                 <div>

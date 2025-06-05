@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { href: "/", label: "Sales Dashboard", icon: BarChart3 },
-  { href: "/ai-suite", label: "TenderAI Pro Suite", icon: Brain },
+  { href: "/ai-suite", label: "AVGC AI Suite", icon: Brain },
   { href: "/blockchain", label: "Blockchain Verification", icon: Shield },
   { href: "/finance-dashboard", label: "Finance Dashboard", icon: File },
   { href: "/tenders", label: "Smart Tenders", icon: FolderOpen },
@@ -38,7 +38,7 @@ export default function Sidebar() {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <File className="h-4 w-4 text-primary-foreground" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">TenderFlow</h1>
+          <h1 className="text-xl font-bold text-foreground">AVGC TENDER</h1>
         </div>
       </div>
 
