@@ -5,8 +5,14 @@ import { insertTenderSchema, insertVendorSchema, insertSubmissionSchema } from "
 import { z } from "zod";
 import * as claude from "./claude";
 import multer from "multer";
-import pdfParse from "pdf-parse";
-import mammoth from "mammoth";
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Tenders routes
@@ -223,6 +229,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // Document extraction routes
+  app.post("/api/documents/extract-pdf", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Import pdf-parse dynamically to avoid initialization issues
+      const pdfParse = await import('pdf-parse').then(m => m.default || m);
+      const data = await pdfParse(req.file.buffer);
+      res.json({ text: data.text });
+    } catch (error: any) {
+      console.error("PDF extraction error:", error);
+      res.status(500).json({ 
+        message: "Failed to extract text from PDF", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/documents/extract-word", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Import mammoth dynamically
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+      res.json({ text: result.value });
+    } catch (error: any) {
+      console.error("Word document extraction error:", error);
+      res.status(500).json({ 
+        message: "Failed to extract text from Word document", 
+        error: error.message 
+      });
     }
   });
 
