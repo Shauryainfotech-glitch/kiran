@@ -18,6 +18,7 @@ import AISuite from "@/pages/ai-suite";
 import BlockchainVerification from "@/pages/blockchain-verification";
 import AdminSettings from "@/pages/admin-settings";
 import OEMManagement from "@/pages/oem-management";
+import TenderCreation from "@/pages/tender-creation";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -55,7 +56,7 @@ function Router() {
       <Route path="/utility" component={NotFound} />
       <Route path="/user-management" component={Vendors} />
       <Route path="/ai-suite" component={AISuite} />
-      <Route path="/tender-add" component={Tenders} />
+      <Route path="/tender-add" component={TenderCreation} />
       <Route path="/admin" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>

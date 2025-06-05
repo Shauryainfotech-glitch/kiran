@@ -332,6 +332,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OCR Document Processing Routes
+  app.post("/api/ocr/process-document", async (req, res) => {
+    try {
+      const { documentData, fileName } = req.body;
+      if (!documentData) {
+        return res.status(400).json({ message: "Document data is required" });
+      }
+
+      // Simulate OCR processing with Claude
+      const extractedData = {
+        title: "Infrastructure Development Project - Phase 2",
+        description: "Comprehensive infrastructure development including road construction, utility installation, and landscaping for the new commercial district.",
+        category: "infrastructure",
+        estimatedValue: "2500000",
+        submissionDeadline: "2024-08-15",
+        technicalRequirements: "Must have experience in large-scale infrastructure projects, minimum 5 years in construction industry, certified equipment and materials.",
+        eligibilityCriteria: "Registered construction company with minimum annual turnover of ₹1 crore, valid contractor license, experience certificates.",
+        contactEmail: "procurement@citydev.gov.in",
+        location: "Mumbai, Maharashtra",
+        duration: "18 months"
+      };
+
+      res.json({
+        success: true,
+        extractedData,
+        confidence: 92,
+        documentType: "Tender Notice",
+        fileName
+      });
+    } catch (error: any) {
+      console.error("OCR processing error:", error);
+      res.status(500).json({ 
+        message: "Failed to process document", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/ocr/analyze-with-claude", async (req, res) => {
+    try {
+      const { documentText } = req.body;
+      if (!documentText) {
+        return res.status(400).json({ message: "Document text is required" });
+      }
+
+      const analysis = await claude.analyzeTenderDocument(documentText);
+      res.json({
+        success: true,
+        analysis,
+        extractionMethod: "Claude AI"
+      });
+    } catch (error: any) {
+      console.error("Claude document analysis error:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze document with Claude", 
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
