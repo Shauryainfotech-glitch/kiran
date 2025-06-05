@@ -11,11 +11,13 @@ import {
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
-  { href: "/", label: "Dashboard", icon: BarChart3 },
-  { href: "/tenders", label: "All Tenders", icon: FolderOpen },
+  { href: "/", label: "Sales Dashboard", icon: BarChart3 },
+  { href: "/finance-dashboard", label: "Finance Dashboard", icon: File },
+  { href: "/tenders", label: "Tender Listing", icon: FolderOpen },
   { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/vendors", label: "Vendors", icon: Building },
-  { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/vendors", label: "Vendor Management", icon: Building },
+  { href: "/tasks", label: "Task Management", icon: Calendar },
+  { href: "/reports", label: "Reports & Analytics", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

@@ -12,6 +12,8 @@ import { z } from "zod";
 
 const formSchema = insertTenderSchema.extend({
   submissionDeadline: z.string().min(1, "Submission deadline is required"),
+  openingDate: z.string().optional(),
+  startDate: z.string().optional(),
 }).omit({ createdBy: true, status: true });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,6 +48,19 @@ export default function TenderForm({ onSubmit, onCancel, isLoading, initialData 
       submissionDeadline: initialData?.submissionDeadline 
         ? new Date(initialData.submissionDeadline).toISOString().slice(0, 16)
         : "",
+      openingDate: initialData?.openingDate 
+        ? new Date(initialData.openingDate).toISOString().slice(0, 16)
+        : "",
+      startDate: initialData?.startDate 
+        ? new Date(initialData.startDate).toISOString().slice(0, 16)
+        : "",
+      location: initialData?.location || "",
+      department: initialData?.department || "",
+      ownership: initialData?.ownership || "",
+      organizationName: initialData?.organizationName || "",
+      documentFees: initialData?.documentFees || "",
+      emdValue: initialData?.emdValue || "",
+      tenderType: initialData?.tenderType || "BSPTL",
     },
   });
 
@@ -53,6 +68,8 @@ export default function TenderForm({ onSubmit, onCancel, isLoading, initialData 
     const submissionData: InsertTender = {
       ...data,
       submissionDeadline: new Date(data.submissionDeadline),
+      openingDate: data.openingDate ? new Date(data.openingDate) : undefined,
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
       createdBy: 1, // Default user
       status: asDraft ? "draft" : "published",
     };
@@ -123,7 +140,13 @@ export default function TenderForm({ onSubmit, onCancel, isLoading, initialData 
               <FormItem>
                 <FormLabel>Estimated Value</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                  <Input 
+                    type="number" 
+                    step="0.01" 
+                    placeholder="0.00" 
+                    {...field} 
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,6 +178,7 @@ export default function TenderForm({ onSubmit, onCancel, isLoading, initialData 
                   rows={4} 
                   placeholder="Enter tender description" 
                   {...field} 
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
