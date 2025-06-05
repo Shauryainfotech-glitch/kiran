@@ -22,6 +22,7 @@ import TenderCreation from "@/pages/tender-creation";
 import TenderResult from "@/pages/tender-result";
 import AIAssistant from "@/pages/ai-assistant";
 import SalesDashboard from "@/pages/sales-dashboard";
+import FirmDocuments from "@/pages/firm-documents";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -53,6 +54,7 @@ function Router() {
       <Route path="/finance" component={FinanceDashboard} />
       <Route path="/mis" component={Reports} />
       <Route path="/documents" component={NotFound} />
+      <Route path="/firm-documents" component={FirmDocuments} />
       <Route path="/task" component={TaskManagement} />
       <Route path="/approvals" component={NotFound} />
       <Route path="/settings" component={Settings} />

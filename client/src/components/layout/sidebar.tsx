@@ -30,6 +30,7 @@ const navigationItems = [
   { href: "/finance", label: "Finance Management", icon: DollarSign },
   { href: "/mis", label: "MIS", icon: BarChart3 },
   { href: "/documents", label: "Document Management", icon: FileText },
+  { href: "/firm-documents", label: "Firm Documents", icon: Building },
   { href: "/task", label: "Task", icon: Users },
   { href: "/approvals", label: "Approval's", icon: CheckCircle },
   { href: "/settings", label: "Settings", icon: Settings },

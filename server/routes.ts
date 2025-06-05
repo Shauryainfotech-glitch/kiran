@@ -888,6 +888,262 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // Firms management routes
+  app.get("/api/firms", async (req, res) => {
+    try {
+      const firms = await storage.getFirms();
+      res.json(firms);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch firms" });
+    }
+  });
+
+  app.get("/api/firms/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const firm = await storage.getFirm(id);
+      
+      if (!firm) {
+        return res.status(404).json({ message: "Firm not found" });
+      }
+      
+      res.json(firm);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch firm" });
+    }
+  });
+
+  app.post("/api/firms", async (req, res) => {
+    try {
+      const validatedData = insertFirmSchema.parse(req.body);
+      const firm = await storage.createFirm(validatedData);
+      res.status(201).json(firm);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Invalid firm data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create firm" });
+      }
+    }
+  });
+
+  app.put("/api/firms/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertFirmSchema.partial().parse(req.body);
+      const firm = await storage.updateFirm(id, validatedData);
+      
+      if (!firm) {
+        return res.status(404).json({ message: "Firm not found" });
+      }
+      
+      res.json(firm);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Invalid firm data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update firm" });
+      }
+    }
+  });
+
+  app.delete("/api/firms/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteFirm(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Firm not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete firm" });
+    }
+  });
+
+  // Document Categories management routes
+  app.get("/api/document-categories", async (req, res) => {
+    try {
+      const categories = await storage.getDocumentCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch document categories" });
+    }
+  });
+
+  app.get("/api/document-categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.getDocumentCategory(id);
+      
+      if (!category) {
+        return res.status(404).json({ message: "Document category not found" });
+      }
+      
+      res.json(category);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch document category" });
+    }
+  });
+
+  app.post("/api/document-categories", async (req, res) => {
+    try {
+      const validatedData = insertDocumentCategorySchema.parse(req.body);
+      const category = await storage.createDocumentCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Invalid category data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create document category" });
+      }
+    }
+  });
+
+  app.put("/api/document-categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertDocumentCategorySchema.partial().parse(req.body);
+      const category = await storage.updateDocumentCategory(id, validatedData);
+      
+      if (!category) {
+        return res.status(404).json({ message: "Document category not found" });
+      }
+      
+      res.json(category);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Invalid category data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update document category" });
+      }
+    }
+  });
+
+  app.delete("/api/document-categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteDocumentCategory(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Document category not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete document category" });
+    }
+  });
+
+  // Firm Documents management routes
+  app.get("/api/firm-documents", async (req, res) => {
+    try {
+      const { firmId, categoryId } = req.query;
+      let documents;
+      
+      if (firmId && typeof firmId === 'string') {
+        documents = await storage.getFirmDocumentsByFirm(parseInt(firmId));
+      } else if (categoryId && typeof categoryId === 'string') {
+        documents = await storage.getFirmDocumentsByCategory(parseInt(categoryId));
+      } else {
+        documents = await storage.getFirmDocuments();
+      }
+      
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch firm documents" });
+    }
+  });
+
+  app.get("/api/firm-documents/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const document = await storage.getFirmDocument(id);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Firm document not found" });
+      }
+      
+      res.json(document);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch firm document" });
+    }
+  });
+
+  app.post("/api/firm-documents", upload.single('file'), async (req, res) => {
+    try {
+      const documentData = JSON.parse(req.body.documentData || '{}');
+      let validatedData = insertFirmDocumentSchema.parse(documentData);
+      
+      // Handle file upload if present
+      if (req.file) {
+        validatedData = {
+          ...validatedData,
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
+          fileType: req.file.mimetype
+        };
+      }
+      
+      const document = await storage.createFirmDocument(validatedData);
+      res.status(201).json(document);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Invalid document data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create firm document" });
+      }
+    }
+  });
+
+  app.put("/api/firm-documents/:id", upload.single('file'), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const documentData = JSON.parse(req.body.documentData || '{}');
+      let validatedData = insertFirmDocumentSchema.partial().parse(documentData);
+      
+      // Handle file upload if present
+      if (req.file) {
+        validatedData = {
+          ...validatedData,
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
+          fileType: req.file.mimetype
+        };
+      }
+      
+      const document = await storage.updateFirmDocument(id, validatedData);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Firm document not found" });
+      }
+      
+      res.json(document);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Invalid document data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update firm document" });
+      }
+    }
+  });
+
+  app.delete("/api/firm-documents/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteFirmDocument(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Firm document not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete firm document" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
