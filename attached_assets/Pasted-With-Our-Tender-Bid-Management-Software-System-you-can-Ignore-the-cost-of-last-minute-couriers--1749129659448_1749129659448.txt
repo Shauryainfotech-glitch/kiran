@@ -1,0 +1,61 @@
+With Our Tender Bid Management Software System, you can:
+Ignore the cost of last-minute couriers.
+Make it simple and easier to log, share, discuss.
+Quickly set up a secure, easily maintained website.
+provide a inexpensive, and friendly method to share information.
+Save time, publication and distribution of technical specifications.
+Accurately version control, and correspondence with each separate bidder.
+Improve communication and team-working between, staff and contracted consultants.
+Decrease calls seeking documentation and share answers to frequently asked questions.
+Allow all those involved to access documentation and be kept up-to-date via instant alerts.
+Provide clarity, and consistency through the effective communication of key procurement milestones.
+Technical Bid Requirement:
+Customer float tender to pre listed vendors, some of them are approved and some are not approved. Technical bid consist of Item description category wise, and its quality. When a proposed technical help is required, then it must be checked against the state technical needs.
+
+EMD Amount Deposited:
+"EMD" referred to as the "earnest money deposit", in the proposed solution EMD details would be mentioned. The main reason for the deposit is to attract the seller.
+
+Commercial Bid quote:
+In the tender system, commercial quote required to mention. Rate are calculated by many methods e.g. basic, excise duty, sales tax etc.
+
+Security Deposit Required:
+If security deposit is needed, it can be mention in tender module.
+
+Opening Date of the Tender:
+Last date of submission and opening date of tender require to be mentioned in each tender.
+
+Details of L1, L2 and L3:
+After opening of tender details of L1, L2 and L3 would be mentioned. In case your organization is not L1 then till its position all participant details would be mentioned, It would also consist of details of approved and not approved vendor.
+
+EMD return Date:
+EMD return date can be mention in tender module.
+
+Upload Document in the Software:
+If required soft copy of the tender/other documents can be uploaded in the system for further reference.
+
+Quotation Management Would Consist of:
+Completion date.
+Payment Term etc.
+Zone / location details.
+Project description and price involve.
+Client's details who is giving the project.
+Benefits of Tender Management Software System for Buyer:
+Limited access via passwords.
+A full audit trail of change and updates.
+Reduced likelihood of poor submissions.
+Costs are decreased in the preparation of the documents.
+Master templates can be exist for all types of sourcing activities.
+Securely managed tenders can be issued to selected bidders error free.
+Benefits of Tender Management Software System for the Bidder:
+Previous bids are all kept in one place.
+It can serve as a database of key information.
+Detailed dates of submissions and records are kept of times.
+One place where you can explore for best practices to re-use for other bids.
+Less time required exploring for the relevant information, and attachments.
+Securely managed tenders can be issued to selected bidders error free.
+Features of Tender Management Software System:
+Capacity to store historical tenders.
+Ability to manage the entire process.
+Automatically notify participating companies.
+Access control allowing for limited procurement persons.
+Issuing tender requests on-line to qualifying registered companies.

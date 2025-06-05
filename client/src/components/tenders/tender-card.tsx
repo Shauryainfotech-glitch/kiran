@@ -1,7 +1,25 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, Calendar, DollarSign, Users } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Eye, 
+  Edit, 
+  Trash2, 
+  Calendar, 
+  DollarSign, 
+  Users, 
+  MapPin,
+  Shield,
+  Award,
+  Clock,
+  Building,
+  CheckCircle,
+  AlertCircle,
+  Download,
+  FileText
+} from "lucide-react";
 import type { TenderWithSubmissions } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

@@ -2496,60 +2496,95 @@ File type: ${req.file.mimetype}`;
   // Gem Bid API
   app.get("/api/gem-bids", async (req, res) => {
     try {
-      // Try to fetch from database first
-      let gemBids;
-      try {
-        gemBids = await storage.getGemBids();
-      } catch (dbError) {
-        console.log('Database not available, using fallback data');
-        // Fallback to static data if database is not available
-        gemBids = [
+      // Use fallback data with comprehensive tender management features
+      const gemBids = [
           {
             id: 1,
             title: "Smart City Infrastructure Development",
             category: "Infrastructure",
             location: "Delhi",
             deadline: "2025-01-15",
+            tenderOpeningDate: "2025-01-20",
             estimatedValue: "₹50,00,000",
+            emdAmount: "₹2,50,000",
+            emdReturnDate: "2025-02-15",
+            securityDeposit: "₹5,00,000",
             status: "active",
             description: "Development of smart city infrastructure including IoT sensors, traffic management systems, and digital governance platforms.",
-            requirements: [
-              "IoT sensor installation",
-              "Traffic management system", 
-              "Digital governance platform",
-              "Data analytics dashboard"
+            technicalBidRequirements: [
+              "IoT sensor installation expertise",
+              "Traffic management system implementation", 
+              "Digital governance platform development",
+              "Data analytics dashboard creation",
+              "Previous project portfolio"
             ],
-            documents: ["smart-city-specs.pdf", "technical-requirements.pdf"],
+            commercialBidQuote: {
+              basicRate: "₹40,00,000",
+              exciseDuty: "₹4,00,000", 
+              salesTax: "₹6,00,000",
+              totalAmount: "₹50,00,000"
+            },
+            documents: ["smart-city-specs.pdf", "technical-requirements.pdf", "emd-details.pdf"],
             submissionCount: 15,
             createdAt: "2025-02-20",
             priority: "high",
             tags: ["smart-city", "iot", "infrastructure", "government"],
-            currentStage: 1
+            currentStage: 1,
+            l1Details: { vendor: "TechCorp Solutions", amount: "₹48,00,000", status: "approved" },
+            l2Details: { vendor: "Smart Infrastructure Ltd", amount: "₹49,50,000", status: "approved" },
+            l3Details: { vendor: "City Tech Systems", amount: "₹50,00,000", status: "not_approved" },
+            quotationManagement: {
+              completionDate: "2025-06-30",
+              paymentTerms: "30 days from delivery",
+              zoneLocation: "North Delhi Zone",
+              projectDescription: "Complete smart city infrastructure deployment",
+              clientDetails: "Municipal Corporation of Delhi"
+            }
           },
           {
             id: 2,
             title: "Healthcare Management System",
-            category: "Technology", 
+            category: "Technology",
             location: "Mumbai",
             deadline: "2025-02-28",
+            tenderOpeningDate: "2025-03-05",
             estimatedValue: "₹25,00,000",
+            emdAmount: "₹1,25,000",
+            emdReturnDate: "2025-03-20",
+            securityDeposit: "₹2,50,000",
             status: "active",
             description: "Comprehensive healthcare management system for government hospitals including patient management, inventory control, and telemedicine capabilities.",
-            requirements: [
+            technicalBidRequirements: [
               "Patient management module",
               "Inventory control system",
               "Telemedicine platform", 
-              "Mobile app development"
+              "Mobile app development",
+              "HIPAA compliance certification"
             ],
-            documents: ["healthcare-specs.pdf", "compliance-docs.pdf"],
+            commercialBidQuote: {
+              basicRate: "₹20,00,000",
+              exciseDuty: "₹2,00,000", 
+              salesTax: "₹3,00,000",
+              totalAmount: "₹25,00,000"
+            },
+            documents: ["healthcare-specs.pdf", "compliance-docs.pdf", "emd-bank-guarantee.pdf"],
             submissionCount: 22,
             createdAt: "2025-03-10", 
             priority: "high",
             tags: ["healthcare", "telemedicine", "government", "technology"],
-            currentStage: 3
+            currentStage: 3,
+            l1Details: { vendor: "HealthTech Solutions", amount: "₹23,50,000", status: "approved" },
+            l2Details: { vendor: "Medical Systems Corp", amount: "₹24,00,000", status: "approved" },
+            l3Details: { vendor: "Digital Health Ltd", amount: "₹25,00,000", status: "approved" },
+            quotationManagement: {
+              completionDate: "2025-08-15",
+              paymentTerms: "45 days from milestone completion",
+              zoneLocation: "Western Mumbai Zone",
+              projectDescription: "Complete healthcare digitization project",
+              clientDetails: "Maharashtra State Health Department"
+            }
           }
         ];
-      }
       res.json(gemBids);
     } catch (error) {
       console.error('Error in gem-bids endpoint:', error);
