@@ -49,7 +49,7 @@ export default function TenderCreation() {
     organizationName: "",
     documentFees: "",
     emdValue: "",
-    ownership: ""
+    ownership: "central"
   });
   
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
