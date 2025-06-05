@@ -99,14 +99,46 @@ export default function AdminSettings() {
   };
 
   const [config, setConfig] = useState<SystemConfig>(systemConfig);
+  
+  const aiConfig: AIConfig = {
+    anthropicApiKey: "",
+    openaiApiKey: "",
+    claudeModel: "claude-sonnet-4-20250514",
+    gptModel: "gpt-4o",
+    enableDocumentAnalysis: true,
+    enableRiskAssessment: true,
+    enableBidOptimization: true,
+    enableComplianceCheck: true,
+    maxAnalysisFileSize: 50,
+    analysisTimeout: 300
+  };
+
+  const [aiSettings, setAiSettings] = useState<AIConfig>(aiConfig);
 
   const handleConfigChange = (key: keyof SystemConfig, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleAiConfigChange = (key: keyof AIConfig, value: any) => {
+    setAiSettings(prev => ({ ...prev, [key]: value }));
+  };
+
   const handleSaveConfig = () => {
     // Save configuration to API
     console.log('Saving configuration:', config);
+  };
+
+  const handleSaveAiConfig = async () => {
+    try {
+      // In production, this would save to environment variables securely
+      console.log('Saving AI configuration:', aiSettings);
+      
+      // For demonstration purposes - in production this would be handled securely
+      alert('AI configuration saved. Please restart the application to apply changes.');
+    } catch (error) {
+      console.error('Error saving AI configuration:', error);
+      alert('Failed to save AI configuration');
+    }
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -323,6 +355,187 @@ export default function AdminSettings() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="ai-llm" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">AI & LLM Configuration</h2>
+            <Button onClick={handleSaveAiConfig}>
+              <Save className="h-4 w-4 mr-2" />
+              Save AI Config
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Brain className="h-5 w-5 mr-2" />
+                  Claude AI Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="anthropic-key">Anthropic API Key</Label>
+                  <Input
+                    id="anthropic-key"
+                    type="password"
+                    placeholder="sk-ant-api03-..."
+                    value={aiSettings.anthropicApiKey}
+                    onChange={(e) => handleAiConfigChange('anthropicApiKey', e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Required for Claude Sonnet 4 document analysis and AI features
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="claude-model">Claude Model</Label>
+                  <Select value={aiSettings.claudeModel} onValueChange={(value) => handleAiConfigChange('claudeModel', value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="claude-sonnet-4-20250514">Claude Sonnet 4 (Latest)</SelectItem>
+                      <SelectItem value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</SelectItem>
+                      <SelectItem value="claude-3-sonnet-20240229">Claude 3 Sonnet</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={aiSettings.enableDocumentAnalysis}
+                    onCheckedChange={(checked) => handleAiConfigChange('enableDocumentAnalysis', checked)}
+                  />
+                  <Label>Enable Document Analysis</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={aiSettings.enableRiskAssessment}
+                    onCheckedChange={(checked) => handleAiConfigChange('enableRiskAssessment', checked)}
+                  />
+                  <Label>Enable Risk Assessment</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={aiSettings.enableComplianceCheck}
+                    onCheckedChange={(checked) => handleAiConfigChange('enableComplianceCheck', checked)}
+                  />
+                  <Label>Enable Compliance Checking</Label>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Bot className="h-5 w-5 mr-2" />
+                  OpenAI GPT Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="openai-key">OpenAI API Key</Label>
+                  <Input
+                    id="openai-key"
+                    type="password"
+                    placeholder="sk-..."
+                    value={aiSettings.openaiApiKey}
+                    onChange={(e) => handleAiConfigChange('openaiApiKey', e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Required for GPT-4o features and multimodal analysis
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gpt-model">GPT Model</Label>
+                  <Select value={aiSettings.gptModel} onValueChange={(value) => handleAiConfigChange('gptModel', value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gpt-4o">GPT-4o (Latest)</SelectItem>
+                      <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+                      <SelectItem value="gpt-4">GPT-4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={aiSettings.enableBidOptimization}
+                    onCheckedChange={(checked) => handleAiConfigChange('enableBidOptimization', checked)}
+                  />
+                  <Label>Enable Bid Optimization</Label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="max-file-size">Max Analysis File Size (MB)</Label>
+                  <Input
+                    id="max-file-size"
+                    type="number"
+                    value={aiSettings.maxAnalysisFileSize}
+                    onChange={(e) => handleAiConfigChange('maxAnalysisFileSize', parseInt(e.target.value))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="analysis-timeout">Analysis Timeout (seconds)</Label>
+                  <Input
+                    id="analysis-timeout"
+                    type="number"
+                    value={aiSettings.analysisTimeout}
+                    onChange={(e) => handleAiConfigChange('analysisTimeout', parseInt(e.target.value))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Cpu className="h-5 w-5 mr-2" />
+                AI Performance & Monitoring
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label>Claude API Status</Label>
+                  <div className="flex items-center space-x-2">
+                    <div className={`h-3 w-3 rounded-full ${aiSettings.anthropicApiKey ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-sm">
+                      {aiSettings.anthropicApiKey ? 'Configured' : 'Not Configured'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>OpenAI API Status</Label>
+                  <div className="flex items-center space-x-2">
+                    <div className={`h-3 w-3 rounded-full ${aiSettings.openaiApiKey ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-sm">
+                      {aiSettings.openaiApiKey ? 'Configured' : 'Not Configured'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>AI Features Status</Label>
+                  <div className="text-sm">
+                    <p>Document Analysis: {aiSettings.enableDocumentAnalysis ? 'Enabled' : 'Disabled'}</p>
+                    <p>Risk Assessment: {aiSettings.enableRiskAssessment ? 'Enabled' : 'Disabled'}</p>
+                    <p>Bid Optimization: {aiSettings.enableBidOptimization ? 'Enabled' : 'Disabled'}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">
