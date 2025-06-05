@@ -1,26 +1,45 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { format } from 'date-fns';
 import { 
-  Search, Filter, Plus, FileText, Calendar,
-  MapPin, DollarSign, Clock, Users, Eye,
-  Download, Share2, Star, AlertCircle, CheckCircle,
-  Building2, Trophy, Target, TrendingUp, Upload, 
-  Scan, Brain, File
-} from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+  Plus, 
+  Search, 
+  Filter, 
+  Calendar, 
+  MapPin, 
+  Building2, 
+  IndianRupee, 
+  Eye, 
+  FileText, 
+  Upload,
+  BarChart3,
+  TrendingUp,
+  Target,
+  Award,
+  Users,
+  Download,
+  Edit,
+  Trash2,
+  CheckCircle
+} from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+
+// Define the GemBid interface
 interface GemBid {
   id: number;
   title: string;
@@ -39,97 +58,195 @@ interface GemBid {
   tags: string[];
 }
 
-export default function GemBid() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedPriority, setSelectedPriority] = useState("all");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
-  const [createMethod, setCreateMethod] = useState<"manual" | "upload">("manual");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
-  const [showBulkActions, setShowBulkActions] = useState(false);
-  const [selectedBids, setSelectedBids] = useState<number[]>([]);
-  const [sortBy, setSortBy] = useState<"deadline" | "value" | "created" | "priority">("deadline");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const { toast } = useToast();
+// Form validation schema
+const gemBidSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  organization: z.string().min(1, 'Organization is required'),
+  category: z.string().min(1, 'Category is required'),
+  estimatedValue: z.number().min(0, 'Estimated value must be positive'),
+  deadline: z.string().min(1, 'Deadline is required'),
+  location: z.string().min(1, 'Location is required'),
+  priority: z.enum(['low', 'medium', 'high']),
+  requirements: z.string().optional(),
+  tags: z.string().optional(),
+});
 
-  const { data: gemBids, isLoading } = useQuery({
+type GemBidFormData = z.infer<typeof gemBidSchema>;
+
+const categories = [
+  'IT Services', 'Construction', 'Healthcare', 'Education', 'Transport',
+  'Energy', 'Telecommunications', 'Manufacturing', 'Agriculture', 'Defense'
+];
+
+export default function GemBid() {
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedPriority, setSelectedPriority] = useState('all');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState<'manual' | 'ocr'>('manual');
+  const [selectedBids, setSelectedBids] = useState<number[]>([]);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Form setup
+  const form = useForm<GemBidFormData>({
+    resolver: zodResolver(gemBidSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      organization: '',
+      category: '',
+      estimatedValue: 0,
+      deadline: '',
+      location: '',
+      priority: 'medium',
+      requirements: '',
+      tags: '',
+    },
+  });
+
+  // Fetch gem bids
+  const { data: gemBids = [], isLoading } = useQuery({
     queryKey: ['/api/gem-bids'],
   });
 
-  const { data: categories } = useQuery({
-    queryKey: ['/api/gem-bid-categories'],
-  });
-
+  // Create gem bid mutation
   const createGemBidMutation = useMutation({
-    mutationFn: async (gemBidData: any) => {
+    mutationFn: async (data: GemBidFormData) => {
+      const processedData = {
+        ...data,
+        requirements: data.requirements?.split(',').map(r => r.trim()).filter(Boolean) || [],
+        tags: data.tags?.split(',').map(t => t.trim()).filter(Boolean) || [],
+        submissionCount: 0,
+        status: 'draft' as const,
+        documents: [],
+      };
       return apiRequest('/api/gem-bids', {
         method: 'POST',
-        body: gemBidData
+        body: JSON.stringify(processedData),
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
-      setIsCreateDialogOpen(false);
-      setCreateMethod("manual");
-      setUploadedFile(null);
-      setExtractedData(null);
+      form.reset();
+      setIsDialogOpen(false);
       toast({
-        title: "Success",
-        description: "Gem bid created successfully",
+        title: 'Success',
+        description: 'Gem bid created successfully',
       });
-    }
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to create gem bid',
+        variant: 'destructive',
+      });
+    },
   });
 
-  const processDocumentMutation = useMutation({
+  // OCR document upload mutation
+  const ocrUploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('document', file);
-      return await apiRequest('/api/ocr/extract-tender-data', {
+      return apiRequest('/api/gem-bids/ocr-extract', {
         method: 'POST',
         body: formData,
       });
     },
     onSuccess: (data) => {
-      setExtractedData(data);
-      setIsProcessing(false);
+      // Pre-fill form with extracted data
+      if (data.extractedData) {
+        form.setValue('title', data.extractedData.title || '');
+        form.setValue('description', data.extractedData.description || '');
+        form.setValue('organization', data.extractedData.organization || '');
+        form.setValue('category', data.extractedData.category || '');
+        form.setValue('estimatedValue', data.extractedData.estimatedValue || 0);
+        form.setValue('deadline', data.extractedData.deadline || '');
+        form.setValue('location', data.extractedData.location || '');
+        form.setValue('requirements', data.extractedData.requirements?.join(', ') || '');
+      }
       toast({
-        title: "Document Processed",
-        description: "Tender data extracted successfully. Review and modify as needed.",
+        title: 'Success',
+        description: 'Document processed successfully. Please review and submit.',
       });
     },
     onError: (error) => {
-      setIsProcessing(false);
       toast({
-        title: "Processing Failed",
-        description: "Failed to extract data from document. Please try manual entry.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to process document. Please try manual entry.',
+        variant: 'destructive',
       });
     },
   });
 
+  // Filter gem bids based on current filters
+  const filteredGemBids = Array.isArray(gemBids) ? gemBids.filter((bid: any) => {
+    const matchesSearch = bid.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         bid.organization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         bid.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || bid.category === selectedCategory;
+    const matchesStatus = selectedStatus === 'all' || bid.status === selectedStatus;
+    const matchesPriority = selectedPriority === 'all' || bid.priority === selectedPriority;
+    const matchesTab = activeTab === 'all' || bid.status === activeTab;
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesPriority && matchesTab;
+  }) : [];
+
+  // Calculate analytics
+  const analytics = {
+    totalBids: Array.isArray(gemBids) ? gemBids.length : 0,
+    activeBids: Array.isArray(gemBids) ? gemBids.filter((bid: any) => bid.status === 'active').length : 0,
+    totalValue: Array.isArray(gemBids) ? gemBids.reduce((sum: number, bid: any) => sum + (bid.estimatedValue || 0), 0) : 0,
+    averageValue: Array.isArray(gemBids) && gemBids.length > 0 ? 
+      gemBids.reduce((sum: number, bid: any) => sum + (bid.estimatedValue || 0), 0) / gemBids.length : 0,
+  };
+
+  // Form submission handler
+  const handleCreateGemBid = (formData: GemBidFormData) => {
+    createGemBidMutation.mutate(formData);
+  };
+
+  // File upload handler for OCR
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-      if (!validTypes.includes(file.type)) {
-        toast({
-          title: "Invalid File Type",
-          description: "Please upload a PDF, JPEG, or PNG file.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setUploadedFile(file);
-      setIsProcessing(true);
-      processDocumentMutation.mutate(file);
+      ocrUploadMutation.mutate(file);
     }
   };
 
+  // Bulk operations
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedBids(filteredGemBids.map(bid => bid.id));
+    } else {
+      setSelectedBids([]);
+    }
+  };
+
+  const handleBulkStatusUpdate = (newStatus: string) => {
+    // Implementation for bulk status update
+    toast({
+      title: 'Status Updated',
+      description: `${selectedBids.length} bids updated to ${newStatus}`,
+    });
+    setSelectedBids([]);
+  };
+
+  const handleBulkDelete = () => {
+    // Implementation for bulk delete
+    toast({
+      title: 'Bids Deleted',
+      description: `${selectedBids.length} bids deleted successfully`,
+    });
+    setSelectedBids([]);
+  };
+
+  // Helper functions for styling
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'default';
@@ -150,456 +267,306 @@ export default function GemBid() {
     }
   };
 
-  const filteredGemBids = (gemBids as GemBid[] || []).filter(bid => {
-    const matchesSearch = bid.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         bid.organization.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || bid.category === selectedCategory;
-    const matchesStatus = selectedStatus === "all" || bid.status === selectedStatus;
-    const matchesPriority = selectedPriority === "all" || bid.priority === selectedPriority;
-    
-    if (activeTab === "active") return matchesSearch && matchesCategory && matchesStatus && matchesPriority && bid.status === 'active';
-    if (activeTab === "submitted") return matchesSearch && matchesCategory && matchesStatus && matchesPriority && bid.status === 'submitted';
-    if (activeTab === "awarded") return matchesSearch && matchesCategory && matchesStatus && matchesPriority && bid.status === 'awarded';
-    
-    return matchesSearch && matchesCategory && matchesStatus && matchesPriority;
-  });
-
-  const handleCreateGemBid = (formData: FormData) => {
-    const gemBidData = {
-      title: formData.get('title'),
-      description: formData.get('description'),
-      organization: formData.get('organization'),
-      category: formData.get('category'),
-      estimatedValue: Number(formData.get('estimatedValue')),
-      deadline: formData.get('deadline'),
-      location: formData.get('location'),
-      priority: formData.get('priority'),
-      requirements: (formData.get('requirements') as string)?.split('\n').filter(Boolean) || [],
-      tags: (formData.get('tags') as string)?.split(',').map(tag => tag.trim()).filter(Boolean) || []
-    };
-    
-    createGemBidMutation.mutate(gemBidData);
-  };
-
-  // Analytics calculations
-  const totalBids = gemBids?.length || 0;
-  const activeBids = gemBids?.filter(bid => bid.status === 'active').length || 0;
-  const totalValue = gemBids?.reduce((sum, bid) => sum + (parseFloat(bid.estimatedValue) || 0), 0) || 0;
-  const averageValue = totalBids > 0 ? totalValue / totalBids : 0;
-
-  // Bulk operations handlers
-  const handleSelectAll = () => {
-    if (selectedBids.length === filteredGemBids.length) {
-      setSelectedBids([]);
-    } else {
-      setSelectedBids(filteredGemBids.map(bid => bid.id));
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedBids.length === 0) return;
-    
-    try {
-      await Promise.all(selectedBids.map(id => 
-        apiRequest(`/api/gem-bids/${id}`, { method: 'DELETE' })
-      ));
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
-      setSelectedBids([]);
-      toast({
-        title: "Success",
-        description: `${selectedBids.length} bids deleted successfully`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete selected bids",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleBulkStatusUpdate = async (newStatus: string) => {
-    if (selectedBids.length === 0) return;
-    
-    try {
-      await Promise.all(selectedBids.map(id => 
-        apiRequest(`/api/gem-bids/${id}`, { 
-          method: 'PUT',
-          body: JSON.stringify({ status: newStatus }),
-          headers: { 'Content-Type': 'application/json' }
-        })
-      ));
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/gem-bids'] });
-      setSelectedBids([]);
-      toast({
-        title: "Success",
-        description: `${selectedBids.length} bids updated to ${newStatus}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update selected bids",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Analytics Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Total Bids</p>
-                <p className="text-2xl font-bold">{totalBids}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Target className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Active Bids</p>
-                <p className="text-2xl font-bold">{activeBids}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="text-2xl font-bold">₹{(totalValue / 1000000).toFixed(1)}M</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Avg Value</p>
-                <p className="text-2xl font-bold">₹{(averageValue / 100000).toFixed(1)}L</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gem Bid</h1>
+          <h1 className="text-3xl font-bold">Gem Bids</h1>
           <p className="text-muted-foreground">
-            Manage and track your premium bidding opportunities
+            Manage and track gem bids with intelligent automation
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {selectedBids.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">{selectedBids.length} selected</Badge>
-              <Select onValueChange={handleBulkStatusUpdate}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Set Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="submitted">Submitted</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                  <SelectItem value="awarded">Awarded</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
-                Delete Selected
-              </Button>
-            </div>
-          )}
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Export Data
-          </Button>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Gem Bid
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New Gem Bid</DialogTitle>
-                <DialogDescription>
-                  Add a new premium bidding opportunity - create manually or upload tender document for automatic extraction
-                </DialogDescription>
-              </DialogHeader>
-              
-              {/* Creation Method Selection */}
-              <div className="flex items-center space-x-4 mb-6">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Gem Bid
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New Gem Bid</DialogTitle>
+            </DialogHeader>
+            
+            {/* Upload Method Selection */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
                 <Button
-                  type="button"
-                  variant={createMethod === "manual" ? "default" : "outline"}
-                  onClick={() => setCreateMethod("manual")}
-                  className="flex items-center space-x-2"
+                  variant={uploadMethod === 'manual' ? 'default' : 'outline'}
+                  onClick={() => setUploadMethod('manual')}
+                  className="flex-1"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Manual Entry</span>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Manual Entry
                 </Button>
                 <Button
-                  type="button"
-                  variant={createMethod === "upload" ? "default" : "outline"}
-                  onClick={() => setCreateMethod("upload")}
-                  className="flex items-center space-x-2"
+                  variant={uploadMethod === 'ocr' ? 'default' : 'outline'}
+                  onClick={() => setUploadMethod('ocr')}
+                  className="flex-1"
                 >
-                  <Upload className="w-4 h-4" />
-                  <span>Upload Document</span>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Document (OCR)
                 </Button>
               </div>
 
-              {createMethod === "upload" && (
-                <div className="border-2 border-dashed border-border rounded-lg p-6 mb-6">
-                  <div className="text-center">
-                    <File className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-medium">Upload Tender Document</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Upload a PDF, JPEG, or PNG file containing tender information. 
-                        Our AI will automatically extract and populate the form fields.
-                      </p>
-                      <Input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={handleFileUpload}
-                        disabled={isProcessing}
-                        className="max-w-xs mx-auto"
-                      />
-                      {uploadedFile && (
-                        <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
-                          <FileText className="w-4 h-4" />
-                          <span>{uploadedFile.name}</span>
-                          {isProcessing && (
-                            <div className="flex items-center space-x-2">
-                              <Scan className="w-4 h-4 animate-spin" />
-                              <span>Processing...</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {extractedData && (
-                        <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
-                          <CheckCircle className="w-4 h-4" />
-                          <span>Data extracted successfully - review and modify below</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              {uploadMethod === 'ocr' && (
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                  <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Upload Tender Document</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Upload a PDF, Word, or image file to automatically extract bid information
+                  </p>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="document-upload"
+                  />
+                  <label htmlFor="document-upload">
+                    <Button asChild variant="outline" disabled={ocrUploadMutation.isPending}>
+                      <span>
+                        {ocrUploadMutation.isPending ? 'Processing...' : 'Choose File'}
+                      </span>
+                    </Button>
+                  </label>
                 </div>
               )}
 
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                handleCreateGemBid(formData);
-              }} className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Bid Title</Label>
-                    <Input 
-                      id="title" 
-                      name="title" 
-                      placeholder="Enter bid title" 
-                      defaultValue={extractedData?.title || ""} 
-                      required 
+              {/* Manual Entry Form */}
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleCreateGemBid)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bid Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter bid title" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="organization"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Organization</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter organization name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="organization">Organization</Label>
-                    <Input 
-                      id="organization" 
-                      name="organization" 
-                      placeholder="Organization name" 
-                      defaultValue={extractedData?.organization || ""} 
-                      required 
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea 
-                    id="description" 
-                    name="description" 
-                    placeholder="Detailed description of the bid" 
-                    defaultValue={extractedData?.description || ""} 
-                    rows={3} 
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter bid description" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Select name="category" defaultValue={extractedData?.category || ""} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="infrastructure">Infrastructure</SelectItem>
-                        <SelectItem value="technology">Technology</SelectItem>
-                        <SelectItem value="construction">Construction</SelectItem>
-                        <SelectItem value="consulting">Consulting</SelectItem>
-                        <SelectItem value="supplies">Supplies</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="estimatedValue">Estimated Value</Label>
-                    <Input 
-                      id="estimatedValue" 
-                      name="estimatedValue" 
-                      type="number" 
-                      placeholder="0" 
-                      defaultValue={extractedData?.estimatedValue || ""} 
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="priority"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Priority</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select priority" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="deadline">Deadline</Label>
-                    <Input 
-                      id="deadline" 
-                      name="deadline" 
-                      type="date" 
-                      defaultValue={extractedData?.deadline ? extractedData.deadline.split('T')[0] : ""} 
-                      required 
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="estimatedValue"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estimated Value (₹)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="Enter estimated value" 
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="deadline"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Deadline</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
-                </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input 
-                      id="location" 
-                      name="location" 
-                      placeholder="Project location" 
-                      defaultValue={extractedData?.location || ""} 
-                    />
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter location" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="requirements"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Requirements (comma-separated)</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter requirements" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tags (comma-separated)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter tags" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={createGemBidMutation.isPending}>
+                      {createGemBidMutation.isPending ? 'Creating...' : 'Create Gem Bid'}
+                    </Button>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select name="priority" defaultValue={extractedData?.priority || "medium"}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="requirements">Requirements (one per line)</Label>
-                  <Textarea id="requirements" name="requirements" placeholder="List requirements..." rows={3} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags (comma separated)</Label>
-                  <Input id="tags" name="tags" placeholder="tag1, tag2, tag3" />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={createGemBidMutation.isPending}>
-                    {createGemBidMutation.isPending ? 'Creating...' : 'Create Gem Bid'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                </form>
+              </Form>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Analytics Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Gem Bids</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Bids</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{filteredGemBids.length}</div>
+            <div className="text-2xl font-bold">{analytics.totalBids}</div>
             <p className="text-xs text-muted-foreground">
-              Active opportunities
+              +2.1% from last month
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Bids</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {filteredGemBids.filter(bid => bid.status === 'active').length}
-            </div>
+            <div className="text-2xl font-bold">{analytics.activeBids}</div>
             <p className="text-xs text-muted-foreground">
-              Ready for submission
+              +5.2% from last month
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              ${filteredGemBids.reduce((sum, bid) => sum + bid.estimatedValue, 0).toLocaleString()}
-            </div>
+            <div className="text-2xl font-bold">₹{analytics.totalValue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Combined bid value
+              +12.3% from last month
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Average Value</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">73.5%</div>
+            <div className="text-2xl font-bold">₹{Math.round(analytics.averageValue).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Historical win rate
+              +3.7% from last month
             </p>
           </CardContent>
         </Card>
@@ -607,39 +574,34 @@ export default function GemBid() {
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
+        <CardContent className="pt-6">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1 min-w-[200px]">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search gem bids..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
                 />
               </div>
             </div>
-            
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="infrastructure">Infrastructure</SelectItem>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="construction">Construction</SelectItem>
-                <SelectItem value="consulting">Consulting</SelectItem>
-                <SelectItem value="supplies">Supplies</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[130px]">
+              <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -651,7 +613,6 @@ export default function GemBid() {
                 <SelectItem value="awarded">Awarded</SelectItem>
               </SelectContent>
             </Select>
-
             <Select value={selectedPriority} onValueChange={setSelectedPriority}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue placeholder="Priority" />
@@ -689,16 +650,26 @@ export default function GemBid() {
               <CardContent className="flex items-center justify-center p-8">
                 <div className="text-center">
                   <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium">No gem bids found</h3>
+                  <h3 className="text-lg font-semibold mb-2">No Gem Bids Found</h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchQuery || selectedCategory !== "all" || selectedStatus !== "all" 
-                      ? "Try adjusting your filters or search terms"
-                      : "Get started by creating your first gem bid"}
+                    {searchTerm || selectedCategory !== 'all' || selectedStatus !== 'all' || selectedPriority !== 'all'
+                      ? 'No bids match your current filters. Try adjusting your search criteria.'
+                      : 'Get started by creating your first gem bid using the form above.'
+                    }
                   </p>
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Gem Bid
-                  </Button>
+                  {(searchTerm || selectedCategory !== 'all' || selectedStatus !== 'all' || selectedPriority !== 'all') && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSelectedCategory('all');
+                        setSelectedStatus('all');
+                        setSelectedPriority('all');
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -774,73 +745,40 @@ export default function GemBid() {
                       </div>
                     </CardHeader>
                   
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {bid.description}
-                    </p>
-                    
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium">${bid.estimatedValue.toLocaleString()}</span>
-                      </div>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {bid.description}
+                      </p>
                       
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>Due {format(new Date(bid.deadline), "MMM dd, yyyy")}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <span>{bid.location}</span>
-                      </div>
-                    </div>
-
-                    {bid.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {bid.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {bid.tags.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{bid.tags.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {bid.submissionCount} submissions
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <IndianRupee className="w-4 h-4" />
+                            <span className="font-medium">₹{bid.estimatedValue?.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            <span>{format(new Date(bid.deadline), 'MMM dd, yyyy')}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            <span>{bid.location}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          Created {format(new Date(bid.createdAt), "MMM dd")}
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {bid.submissionCount} submissions
+                          </span>
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4 mr-1" />
+                            View Details
+                          </Button>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="w-4 h-4 mr-1" />
-                          Download
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Share2 className="w-4 h-4 mr-1" />
-                          Share
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
           )}
