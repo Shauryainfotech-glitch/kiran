@@ -20,7 +20,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
-  { href: "/", label: "Sales Dashboard", icon: BarChart3 },
+  { href: "/", label: "Dashboard", icon: BarChart3 },
+  { href: "/sales-dashboard", label: "Sales Dashboard", icon: TrendingUp },
   { href: "/finance-dashboard", label: "Finance Dashboard", icon: DollarSign },
   { href: "/tenders", label: "Tender", icon: FolderOpen },
   { href: "/tender-result", label: "Tender Result", icon: TrendingUp },

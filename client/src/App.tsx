@@ -21,6 +21,7 @@ import OEMManagement from "@/pages/oem-management";
 import TenderCreation from "@/pages/tender-creation";
 import TenderResult from "@/pages/tender-result";
 import AIAssistant from "@/pages/ai-assistant";
+import SalesDashboard from "@/pages/sales-dashboard";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/finance-dashboard" component={FinanceDashboard} />
+      <Route path="/sales-dashboard" component={SalesDashboard} />
       <Route path="/tenders" component={Tenders} />
       <Route path="/tender-result" component={TenderResult} />
       <Route path="/analytics" component={Reports} />
