@@ -20,6 +20,7 @@ import AdminSettings from "@/pages/admin-settings";
 import OEMManagement from "@/pages/oem-management";
 import TenderCreation from "@/pages/tender-creation";
 import TenderResult from "@/pages/tender-result";
+import AIAssistant from "@/pages/ai-assistant";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/utility" component={NotFound} />
       <Route path="/user-management" component={Vendors} />
       <Route path="/ai-suite" component={AISuite} />
+      <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/tender-add" component={TenderCreation} />
       <Route path="/admin-settings" component={AdminSettings} />
       <Route component={NotFound} />

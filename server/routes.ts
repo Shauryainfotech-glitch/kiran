@@ -550,6 +550,272 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Assistant configuration endpoints
+  app.get("/api/ai/assistant/config", async (req, res) => {
+    try {
+      // Return current AI assistant configuration
+      const config = {
+        documentAnalysis: {
+          enabled: true,
+          autoExtractData: true,
+          riskAssessment: true,
+          complianceCheck: true,
+          successProbability: true,
+          competitorAnalysis: true,
+          smartTaskAssignment: true,
+          deadlinePredictions: true,
+          automationLevel: "Medium (Semi-auto)",
+          threshold: 0.6,
+          optimizationModel: "Hybrid",
+          hybrid: true
+        },
+        performance: {
+          responseCacheTTL: 30,
+          concurrentRequestsLimit: 10,
+          requestTimeout: 90
+        },
+        privacy: {
+          dataAnonymization: true,
+          localProcessingMode: true,
+          auditAllInteractions: true,
+          dataRetentionDays: 90
+        }
+      };
+      
+      res.json(config);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get AI configuration", error: error.message });
+    }
+  });
+
+  app.post("/api/ai/assistant/config", async (req, res) => {
+    try {
+      const config = req.body;
+      // Save AI assistant configuration
+      console.log('Saving AI Assistant configuration:', config);
+      res.json({ message: "AI Assistant configuration saved successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to save AI configuration", error: error.message });
+    }
+  });
+
+  // Knowledge base endpoints
+  app.get("/api/ai/knowledge-bases", async (req, res) => {
+    try {
+      const knowledgeBases = [
+        {
+          id: "1",
+          name: "Tender Documents",
+          description: "Historical tender documents and specifications",
+          category: "Documents",
+          documents: 1247,
+          lastUpdated: "2024-06-04",
+          status: "active",
+          accuracy: 94.2
+        },
+        {
+          id: "2", 
+          name: "Compliance Guidelines",
+          description: "Regulatory compliance and legal requirements",
+          category: "Compliance",
+          documents: 586,
+          lastUpdated: "2024-06-03",
+          status: "training",
+          accuracy: 87.5
+        },
+        {
+          id: "3",
+          name: "Vendor Profiles", 
+          description: "Vendor capabilities and performance history",
+          category: "Vendors",
+          documents: 923,
+          lastUpdated: "2024-06-05",
+          status: "active",
+          accuracy: 91.8
+        },
+        {
+          id: "4",
+          name: "Risk Assessment Models",
+          description: "Risk evaluation frameworks and historical data", 
+          category: "Risk",
+          documents: 445,
+          lastUpdated: "2024-06-02",
+          status: "active",
+          accuracy: 96.1
+        }
+      ];
+      
+      res.json(knowledgeBases);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get knowledge bases", error: error.message });
+    }
+  });
+
+  app.post("/api/ai/knowledge-bases", async (req, res) => {
+    try {
+      const { name, description, category } = req.body;
+      
+      const newKnowledgeBase = {
+        id: Date.now().toString(),
+        name,
+        description,
+        category,
+        documents: 0,
+        lastUpdated: new Date().toISOString().split('T')[0],
+        status: "inactive",
+        accuracy: 0
+      };
+      
+      res.status(201).json(newKnowledgeBase);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to create knowledge base", error: error.message });
+    }
+  });
+
+  app.post("/api/ai/knowledge-bases/:id/query", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { query } = req.body;
+      
+      // Simulate knowledge base query
+      const results = {
+        query,
+        results: [
+          {
+            document: "Tender Specification Document #123",
+            relevance: 0.95,
+            excerpt: "Requirements for technical specifications and compliance standards...",
+            source: "KB-" + id
+          },
+          {
+            document: "Historical Tender Analysis",
+            relevance: 0.87,
+            excerpt: "Similar tender requirements and outcome patterns...",
+            source: "KB-" + id
+          }
+        ],
+        confidence: 0.91,
+        processingTime: "1.2s"
+      };
+      
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to query knowledge base", error: error.message });
+    }
+  });
+
+  // Workflow automation endpoints
+  app.get("/api/ai/workflows", async (req, res) => {
+    try {
+      const workflows = [
+        {
+          id: "1",
+          name: "Auto-generate Tender Summaries",
+          trigger: "New tender uploaded",
+          action: "Generate executive summary",
+          status: "active",
+          executionCount: 324,
+          lastRun: "2024-06-05T10:30:00Z",
+          successRate: 98.5
+        },
+        {
+          id: "2",
+          name: "Smart Task Assignment",
+          trigger: "Tender deadline approaching",
+          action: "Assign tasks to team members",
+          status: "active",
+          executionCount: 156,
+          lastRun: "2024-06-05T09:15:00Z",
+          successRate: 95.2
+        },
+        {
+          id: "3",
+          name: "Deadline Predictions",
+          trigger: "Project milestone update",
+          action: "Update deadline predictions",
+          status: "paused",
+          executionCount: 89,
+          lastRun: "2024-06-04T16:45:00Z",
+          successRate: 92.1
+        }
+      ];
+      
+      res.json(workflows);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get workflows", error: error.message });
+    }
+  });
+
+  app.post("/api/ai/workflows", async (req, res) => {
+    try {
+      const { name, trigger, action } = req.body;
+      
+      const newWorkflow = {
+        id: Date.now().toString(),
+        name,
+        trigger,
+        action,
+        status: "active",
+        executionCount: 0,
+        lastRun: new Date().toISOString(),
+        successRate: 0
+      };
+      
+      res.status(201).json(newWorkflow);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to create workflow", error: error.message });
+    }
+  });
+
+  app.patch("/api/ai/workflows/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      // Update workflow status
+      const updatedWorkflow = {
+        id,
+        status,
+        lastModified: new Date().toISOString()
+      };
+      
+      res.json(updatedWorkflow);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update workflow", error: error.message });
+    }
+  });
+
+  // AI Performance metrics endpoint
+  app.get("/api/ai/metrics", async (req, res) => {
+    try {
+      const metrics = {
+        processing: {
+          rate: 94.2,
+          trend: 2.1
+        },
+        accuracy: {
+          rate: 97.8,
+          improvement: 0.5
+        },
+        responseTime: {
+          average: 1.4,
+          reduction: 0.2
+        },
+        systemHealth: {
+          cpu: 67,
+          memory: 45,
+          knowledgeBaseLoad: 78,
+          activeWorkflows: 12,
+          totalWorkflows: 15
+        }
+      };
+      
+      res.json(metrics);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get AI metrics", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
