@@ -364,7 +364,7 @@ export default function AIAssistant() {
                 <div className="space-y-2">
                   <Label>Automation Level</Label>
                   <Select 
-                    value={config.documentAnalysis.automationLevel || "Medium (Semi-auto)"} 
+                    value={config.documentAnalysis.automationLevel || "medium-semi-auto"} 
                     onValueChange={(value) => handleConfigChange('documentAnalysis', 'automationLevel', value)}
                   >
                     <SelectTrigger>
