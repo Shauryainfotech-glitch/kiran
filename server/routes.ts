@@ -2367,6 +2367,189 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // Gem Bid API
+  app.get("/api/gem-bids", async (req, res) => {
+    try {
+      const gemBids = [
+        {
+          id: 1,
+          title: "Smart City Infrastructure Development",
+          description: "Comprehensive smart city solution including IoT sensors, traffic management, and citizen services platform.",
+          organization: "Municipal Corporation",
+          category: "infrastructure",
+          estimatedValue: 25000000,
+          deadline: "2025-08-15",
+          status: "active",
+          location: "Mumbai, Maharashtra",
+          requirements: [
+            "IoT integration expertise",
+            "Traffic management systems",
+            "Mobile application development",
+            "Data analytics platform"
+          ],
+          documents: ["requirements.pdf", "technical-specs.pdf", "compliance.pdf"],
+          submissionCount: 12,
+          createdAt: "2025-05-01",
+          priority: "high",
+          tags: ["smart-city", "iot", "infrastructure", "government"]
+        },
+        {
+          id: 2,
+          title: "Digital Banking Platform Modernization",
+          description: "Complete overhaul of legacy banking systems with modern microservices architecture and enhanced security.",
+          organization: "National Bank Ltd",
+          category: "technology",
+          estimatedValue: 18500000,
+          deadline: "2025-09-30",
+          status: "active",
+          location: "Delhi, India",
+          requirements: [
+            "Microservices architecture",
+            "Cloud-native development",
+            "Security compliance",
+            "API development"
+          ],
+          documents: ["banking-specs.pdf", "security-requirements.pdf"],
+          submissionCount: 8,
+          createdAt: "2025-05-15",
+          priority: "high",
+          tags: ["banking", "fintech", "cloud", "security"]
+        },
+        {
+          id: 3,
+          title: "Green Energy Solar Farm Construction",
+          description: "Construction and installation of 500MW solar power plant with smart grid integration.",
+          organization: "Renewable Energy Corp",
+          category: "construction",
+          estimatedValue: 45000000,
+          deadline: "2025-12-31",
+          status: "submitted",
+          location: "Rajasthan, India",
+          requirements: [
+            "Solar panel installation",
+            "Grid integration",
+            "Environmental compliance",
+            "Maintenance contracts"
+          ],
+          documents: ["environmental-clearance.pdf", "technical-drawings.pdf"],
+          submissionCount: 15,
+          createdAt: "2025-04-20",
+          priority: "medium",
+          tags: ["solar", "renewable", "construction", "environment"]
+        },
+        {
+          id: 4,
+          title: "Healthcare Management System",
+          description: "Integrated hospital management system with patient records, billing, and telemedicine capabilities.",
+          organization: "State Health Department",
+          category: "technology",
+          estimatedValue: 12000000,
+          deadline: "2025-07-20",
+          status: "awarded",
+          location: "Chennai, Tamil Nadu",
+          requirements: [
+            "EMR integration",
+            "Telemedicine platform",
+            "Billing system",
+            "Mobile app development"
+          ],
+          documents: ["healthcare-specs.pdf", "compliance-docs.pdf"],
+          submissionCount: 22,
+          createdAt: "2025-03-10",
+          priority: "high",
+          tags: ["healthcare", "telemedicine", "government", "technology"]
+        }
+      ];
+      res.json(gemBids);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gem bids" });
+    }
+  });
+
+  app.get("/api/gem-bid-categories", async (req, res) => {
+    try {
+      const categories = [
+        { id: "infrastructure", name: "Infrastructure", description: "Smart city and urban development projects" },
+        { id: "technology", name: "Technology", description: "Software and digital transformation projects" },
+        { id: "construction", name: "Construction", description: "Building and infrastructure construction" },
+        { id: "consulting", name: "Consulting", description: "Advisory and strategic consulting services" },
+        { id: "supplies", name: "Supplies", description: "Equipment and material procurement" }
+      ];
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gem bid categories" });
+    }
+  });
+
+  app.post("/api/gem-bids", async (req, res) => {
+    try {
+      const gemBidData = req.body;
+      const newGemBid = {
+        id: Date.now(),
+        ...gemBidData,
+        status: "draft",
+        submissionCount: 0,
+        createdAt: new Date().toISOString(),
+        documents: [],
+        requirements: gemBidData.requirements || []
+      };
+      res.json(newGemBid);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create gem bid" });
+    }
+  });
+
+  app.get("/api/gem-bids/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      // Mock response for specific gem bid
+      const gemBid = {
+        id: parseInt(id),
+        title: "Sample Gem Bid",
+        description: "Detailed gem bid information",
+        organization: "Sample Organization",
+        category: "technology",
+        estimatedValue: 1000000,
+        deadline: "2025-12-31",
+        status: "active",
+        location: "Sample Location",
+        requirements: ["Requirement 1", "Requirement 2"],
+        documents: ["doc1.pdf", "doc2.pdf"],
+        submissionCount: 5,
+        createdAt: new Date().toISOString(),
+        priority: "medium",
+        tags: ["sample", "test"]
+      };
+      res.json(gemBid);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gem bid" });
+    }
+  });
+
+  app.put("/api/gem-bids/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const updatedGemBid = {
+        id: parseInt(id),
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      res.json(updatedGemBid);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update gem bid" });
+    }
+  });
+
+  app.delete("/api/gem-bids/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      res.json({ success: true, message: `Gem bid ${id} deleted successfully` });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete gem bid" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
