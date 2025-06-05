@@ -498,16 +498,12 @@ export default function TenderCreation() {
 
                 <div className="space-y-2">
                   <Label htmlFor="ownership">Ownership</Label>
-                  <Select value={formData.ownership} onValueChange={(value) => handleInputChange('ownership', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select ownership type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="central">Central Government</SelectItem>
-                      <SelectItem value="state">State Government</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="ownership"
+                    value={formData.ownership}
+                    onChange={(e) => handleInputChange('ownership', e.target.value)}
+                    placeholder="e.g., Central Government, State Government, Private"
+                  />
                 </div>
 
                 <div className="space-y-2">
