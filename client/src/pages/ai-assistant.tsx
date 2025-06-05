@@ -105,9 +105,9 @@ export default function AIAssistant() {
       competitorAnalysis: true,
       smartTaskAssignment: true,
       deadlinePredictions: true,
-      automationLevel: "Medium (Semi-auto)",
+      automationLevel: "medium-semi-auto",
       threshold: 0.6,
-      optimizationModel: "Hybrid",
+      optimizationModel: "hybrid",
       hybrid: true
     },
     performance: {
