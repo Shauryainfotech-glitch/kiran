@@ -91,11 +91,17 @@ export class MemStorage implements IStorage {
   private vendors: Map<number, Vendor>;
   private submissions: Map<number, Submission>;
   private documents: Map<number, Document>;
+  private firms: Map<number, Firm>;
+  private documentCategories: Map<number, DocumentCategory>;
+  private firmDocuments: Map<number, FirmDocument>;
   private currentUserId: number;
   private currentTenderId: number;
   private currentVendorId: number;
   private currentSubmissionId: number;
   private currentDocumentId: number;
+  private currentFirmId: number;
+  private currentDocumentCategoryId: number;
+  private currentFirmDocumentId: number;
 
   constructor() {
     this.users = new Map();
@@ -103,11 +109,17 @@ export class MemStorage implements IStorage {
     this.vendors = new Map();
     this.submissions = new Map();
     this.documents = new Map();
+    this.firms = new Map();
+    this.documentCategories = new Map();
+    this.firmDocuments = new Map();
     this.currentUserId = 1;
     this.currentTenderId = 1;
     this.currentVendorId = 1;
     this.currentSubmissionId = 1;
     this.currentDocumentId = 1;
+    this.currentFirmId = 1;
+    this.currentDocumentCategoryId = 1;
+    this.currentFirmDocumentId = 1;
 
     // Create default admin user with sample data
     this.createUser({
@@ -177,6 +189,60 @@ export class MemStorage implements IStorage {
         address: "789 Creative Blvd, Design Town, NY 10001",
         contactPerson: "Emma Wilson",
         registrationNumber: "CMS-2024-003"
+      });
+
+      // Initialize sample firms
+      this.createFirm({
+        name: "AVF Creative Brand Consultancy Pvt. Ltd.",
+        registrationNumber: "AVF-2024-001",
+        address: "Creative Hub, Mumbai, Maharashtra",
+        contactPerson: "Creative Director",
+        phone: "+91-9876543210",
+        email: "info@avfcreative.com",
+        isActive: true
+      });
+
+      // Initialize document categories
+      this.createDocumentCategory({
+        name: "Basic Documents",
+        description: "Essential company documents",
+        isRequired: true,
+        sortOrder: 1
+      });
+
+      this.createDocumentCategory({
+        name: "Advance Document",
+        description: "Advanced certification documents",
+        isRequired: false,
+        sortOrder: 2
+      });
+
+      this.createDocumentCategory({
+        name: "Empanelment",
+        description: "Empanelment related documents",
+        isRequired: false,
+        sortOrder: 3
+      });
+
+      this.createDocumentCategory({
+        name: "Membership",
+        description: "Professional membership documents",
+        isRequired: false,
+        sortOrder: 4
+      });
+
+      this.createDocumentCategory({
+        name: "Gem OEM Panel",
+        description: "Gem OEM Panel documents",
+        isRequired: false,
+        sortOrder: 5
+      });
+
+      this.createDocumentCategory({
+        name: "Trade Mark",
+        description: "Trade mark and intellectual property documents",
+        isRequired: false,
+        sortOrder: 6
       });
     });
   }
@@ -366,6 +432,150 @@ export class MemStorage implements IStorage {
 
   async deleteDocument(id: number): Promise<boolean> {
     return this.documents.delete(id);
+  }
+
+  // Firms
+  async getFirms(): Promise<Firm[]> {
+    return Array.from(this.firms.values());
+  }
+
+  async getFirm(id: number): Promise<Firm | undefined> {
+    return this.firms.get(id);
+  }
+
+  async createFirm(insertFirm: InsertFirm): Promise<Firm> {
+    const id = this.currentFirmId++;
+    const firm: Firm = {
+      ...insertFirm,
+      id,
+      isActive: insertFirm.isActive ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      establishedDate: insertFirm.establishedDate || null,
+      registrationNumber: insertFirm.registrationNumber || null,
+      address: insertFirm.address || null,
+      contactPerson: insertFirm.contactPerson || null,
+      phone: insertFirm.phone || null,
+      email: insertFirm.email || null,
+      website: insertFirm.website || null
+    };
+    this.firms.set(id, firm);
+    return firm;
+  }
+
+  async updateFirm(id: number, updates: Partial<InsertFirm>): Promise<Firm | undefined> {
+    const firm = this.firms.get(id);
+    if (!firm) return undefined;
+
+    const updatedFirm: Firm = {
+      ...firm,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.firms.set(id, updatedFirm);
+    return updatedFirm;
+  }
+
+  async deleteFirm(id: number): Promise<boolean> {
+    return this.firms.delete(id);
+  }
+
+  // Document Categories
+  async getDocumentCategories(): Promise<DocumentCategory[]> {
+    return Array.from(this.documentCategories.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async getDocumentCategory(id: number): Promise<DocumentCategory | undefined> {
+    return this.documentCategories.get(id);
+  }
+
+  async createDocumentCategory(insertCategory: InsertDocumentCategory): Promise<DocumentCategory> {
+    const id = this.currentDocumentCategoryId++;
+    const category: DocumentCategory = {
+      ...insertCategory,
+      id,
+      description: insertCategory.description || null,
+      isRequired: insertCategory.isRequired ?? false,
+      sortOrder: insertCategory.sortOrder ?? 0
+    };
+    this.documentCategories.set(id, category);
+    return category;
+  }
+
+  async updateDocumentCategory(id: number, updates: Partial<InsertDocumentCategory>): Promise<DocumentCategory | undefined> {
+    const category = this.documentCategories.get(id);
+    if (!category) return undefined;
+
+    const updatedCategory: DocumentCategory = {
+      ...category,
+      ...updates
+    };
+    this.documentCategories.set(id, updatedCategory);
+    return updatedCategory;
+  }
+
+  async deleteDocumentCategory(id: number): Promise<boolean> {
+    return this.documentCategories.delete(id);
+  }
+
+  // Firm Documents
+  async getFirmDocuments(): Promise<FirmDocument[]> {
+    return Array.from(this.firmDocuments.values());
+  }
+
+  async getFirmDocumentsByFirm(firmId: number): Promise<FirmDocument[]> {
+    return Array.from(this.firmDocuments.values()).filter(doc => doc.firmId === firmId);
+  }
+
+  async getFirmDocumentsByCategory(categoryId: number): Promise<FirmDocument[]> {
+    return Array.from(this.firmDocuments.values()).filter(doc => doc.categoryId === categoryId);
+  }
+
+  async getFirmDocument(id: number): Promise<FirmDocument | undefined> {
+    return this.firmDocuments.get(id);
+  }
+
+  async createFirmDocument(insertDocument: InsertFirmDocument): Promise<FirmDocument> {
+    const id = this.currentFirmDocumentId++;
+    const document: FirmDocument = {
+      ...insertDocument,
+      id,
+      uploadedAt: new Date(),
+      categoryId: insertDocument.categoryId || null,
+      documentNumber: insertDocument.documentNumber || null,
+      fileName: insertDocument.fileName || null,
+      fileSize: insertDocument.fileSize || null,
+      fileType: insertDocument.fileType || null,
+      status: insertDocument.status || "Available",
+      validity: insertDocument.validity || null,
+      renewal: insertDocument.renewal || null,
+      googleLinking: insertDocument.googleLinking || null,
+      responsible: insertDocument.responsible || null,
+      charges: insertDocument.charges || null,
+      duration: insertDocument.duration || null,
+      challenges: insertDocument.challenges || null,
+      timeline: insertDocument.timeline || null,
+      description: insertDocument.description || null,
+      createdBy: insertDocument.createdBy || null
+    };
+    this.firmDocuments.set(id, document);
+    return document;
+  }
+
+  async updateFirmDocument(id: number, updates: Partial<InsertFirmDocument>): Promise<FirmDocument | undefined> {
+    const document = this.firmDocuments.get(id);
+    if (!document) return undefined;
+
+    const updatedDocument: FirmDocument = {
+      ...document,
+      ...updates
+    };
+    this.firmDocuments.set(id, updatedDocument);
+    return updatedDocument;
+  }
+
+  async deleteFirmDocument(id: number): Promise<boolean> {
+    return this.firmDocuments.delete(id);
   }
 }
 
