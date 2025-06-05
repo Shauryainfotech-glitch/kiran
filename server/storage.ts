@@ -192,7 +192,16 @@ export class MemStorage implements IStorage {
       status: insertTender.status || "draft",
       description: insertTender.description || null,
       estimatedValue: insertTender.estimatedValue || null,
-      createdBy: insertTender.createdBy || null
+      createdBy: insertTender.createdBy || null,
+      openingDate: insertTender.openingDate || null,
+      startDate: insertTender.startDate || null,
+      location: insertTender.location || null,
+      department: insertTender.department || null,
+      ownership: insertTender.ownership || null,
+      documentFees: insertTender.documentFees || null,
+      emdValue: insertTender.emdValue || null,
+      tenderType: insertTender.tenderType || "BSPTL",
+      organizationName: insertTender.organizationName || null
     };
     this.tenders.set(id, tender);
     return tender;

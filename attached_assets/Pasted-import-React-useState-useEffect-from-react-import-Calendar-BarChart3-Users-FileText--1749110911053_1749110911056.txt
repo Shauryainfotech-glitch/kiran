@@ -1,0 +1,2893 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar, BarChart3, Users, FileText, Search, Filter, Plus, Download, Upload, Eye, Edit, Trash2, Clock, DollarSign, TrendingUp, Award, CheckCircle, XCircle, AlertCircle, Bell, Settings, User, LogOut, Menu, X, ChevronDown, ChevronRight, Building, MapPin, Phone, Mail, Globe, Star, Heart, Share2, Copy, Printer, RefreshCw, ArrowLeft, ArrowRight, FileDownload, FileUpload, Calendar as CalendarIcon, Users as UsersIcon } from 'lucide-react';
+
+const TenderManagementApp = () => {
+  const [activeModule, setActiveModule] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedTender, setSelectedTender] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState('fresh');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Comprehensive Dashboard Data
+  const dashboardStats = {
+    freshTenders: 0,
+    liveTenders: 55,
+    tenderResults: 199,
+    submittedTenders: 59,
+    myTenders: 10,
+    inProcessTenders: 10,
+    assignedToTeam: 38
+  };
+
+  // Detailed Finance Data
+  const financeStats = {
+    emdPayment: { paid: 4318026301, refund: 848579 },
+    sdPayment: { paid: 0, refund: 0 },
+    emdUnderProcess: 3000000,
+    emdForfeited: 0,
+    sdForfeited: 0,
+    expired: { emd: 2270974427, sd: 0 },
+    newRequests: { 
+      bankGuarantee: 10000, 
+      securityDeposit: 0, 
+      fees: 13668277, 
+      others: 0,
+      emd: 343244
+    },
+    usedRequests: { 
+      bankGuarantee: 0, 
+      securityDeposit: 0, 
+      fees: 14785, 
+      others: 0,
+      emd: 340988
+    }
+  };
+
+  // Detailed Tender Data
+  const sampleTenders = [
+    {
+      id: 86964458,
+      title: "Request for proposal (RfP) for appointment of general consultant for office of the chief administrative officer/construction, eastern railway/kolkata",
+      organization: "Eastern Railway - Kolkata, West Bengal, India",
+      value: 984200,
+      status: "Submitted",
+      type: "BSPTL",
+      dueDate: "16-04-2025",
+      submissionDate: "08-04-2025",
+      location: "Kolkata",
+      department: "Eastern Railway",
+      ownership: "Central Government",
+      tenderId: 12505,
+      estimatedCost: "₹ 98.42 Lakh",
+      documentFees: "₹ 10.00 Thousand",
+      emdValue: "₹ 2.68 Lakh",
+      startDate: "16-04-2025",
+      lastDate: "16-04-2025",
+      openingDate: "16-04-2025"
+    },
+    {
+      id: 468500,
+      title: "Supply of passenger train building - I fixed length",
+      organization: "Planning And Development Department - Jharkhand, Bihar, India",
+      value: 468500,
+      status: "In Process",
+      type: "BSPTL",
+      dueDate: "02-04-2025",
+      submissionDate: "08-04-2025",
+      location: "Bihar",
+      department: "Planning And Development Department",
+      ownership: "State Government",
+      tenderId: 23800,
+      estimatedCost: "₹ 46.85 Lakh",
+      documentFees: "₹ 5.00 Thousand",
+      emdValue: "₹ 1.25 Lakh"
+    },
+    {
+      id: 6469,
+      title: "Refer Document",
+      organization: "North Eastern Railways - Tezmapur, Uttar Pradesh, India",
+      value: 0,
+      status: "In Process",
+      type: "BSPTL",
+      dueDate: "17-04-2025",
+      submissionDate: "08-04-2025",
+      location: "Uttar Pradesh",
+      tenderId: 6469
+    }
+  ];
+
+  // Today's Activities
+  const todayActivities = [
+    { 
+      id: 6500, 
+      assignee: "Yogesh Gadhavi", 
+      assignBy: "Palak Shah",
+      dueDate: "08-04-2025 18:43", 
+      submissionDate: "08-04-2025",
+      status: "Assigned"
+    },
+    { 
+      id: 6500, 
+      assignee: "Vinisha Patel", 
+      assignBy: "Palak Shah",
+      dueDate: "02-04-2025 18:04", 
+      submissionDate: "08-04-2025",
+      status: "In Progress"
+    },
+    { 
+      id: 6500, 
+      assignee: "Palak Shah", 
+      assignBy: "Admin",
+      dueDate: "02-04-2025 18:04", 
+      submissionDate: "08-04-2025",
+      status: "Completed"
+    }
+  ];
+
+  // BOQ Search Results
+  const boqResults = [
+    {
+      id: 53094271,
+      submissionDate: "09-04-2025",
+      tenderValue: "₹ 6.44 Cr",
+      t247Id: 86964458,
+      description: "Office Revolving Chair 18''x21'' Capsule Medium Back Type",
+      quantity: "2.00 Each",
+      category: "₹ Refer Docs",
+      location: "Koderma, Jharkhand, India"
+    },
+    {
+      id: 53881909,
+      submissionDate: "09-04-2025",
+      tenderValue: "₹ Refer Docs",
+      t247Id: 86989217,
+      description: "Providing And Fixing Kitchen Sink With C.I. Brackets, C.P. Brass Chain With Rubber Plug, 40 Mm C.P. Brass Waste Complete, Including Painting The Fittings And Brackets, Cutting And Making Good The Walls Wherever Required. 17.3 White Glazed Fire Clay Kitchen Sink Of Size 600×450x250 Mm - Executive Chair High Back Mesh Chair In Black Colour With Matte Finish Specification",
+      quantity: "1.00 Nos",
+      category: "₹ 15.46 K",
+      location: "Mysore, Karnataka, India"
+    }
+  ];
+
+  // Company Profiles for Competitor Analysis
+  const companyProfiles = [
+    {
+      name: "Geeken Seating Collection Private Limited",
+      participatedTenders: 307,
+      awardedTenders: 65,
+      lostTenders: 140,
+      l1Bids: 9,
+      financialBids: 78,
+      technicalBids: 14,
+      totalValue: {
+        participated: "₹ 440.38 Cr",
+        awarded: "₹ 40.59 Cr",
+        lost: "₹ 294.56 Cr",
+        l1: "₹ 8.34 Cr",
+        financial: "₹ 44.65 Cr",
+        technical: "₹ 46.57 Cr"
+      },
+      stateWiseResults: [
+        { state: "Uttar Pradesh", published: 335638, participated: 51, awarded: 7 },
+        { state: "Haryana", published: 91269, participated: 37, awarded: 08 },
+        { state: "Delhi", published: 81727, participated: 33, awarded: 0 },
+        { state: "Jharkhand", published: 58810, participated: 36, awarded: 1 },
+        { state: "Madhya Pradesh", published: 117568, participated: 27, awarded: 6 },
+        { state: "Assam", published: 44820, participated: 22, awarded: 0 },
+        { state: "Gujarat", published: 54836, participated: 20, awarded: 0 }
+      ]
+    },
+    {
+      name: "Nilkamal Limited",
+      participatedTenders: 641,
+      awardedTenders: 88,
+      lostTenders: 188,
+      l1Bids: 71,
+      financialBids: 306,
+      technicalBids: 63,
+      totalValue: {
+        participated: "₹ 472.74 Cr",
+        awarded: "₹ 29.72 Cr",
+        lost: "₹ 180.29 Cr",
+        l1: "₹ 24.63 Cr",
+        financial: "₹ 103.87 Cr",
+        technical: "₹ 172.41 Cr"
+      }
+    }
+  ];
+
+  // Finance Management Data
+  const financeTransactions = [
+    { id: 13044, organization: "South Eastern Railway", paymentDate: "08-04-2025 12:00:00", type: "EMD", mode: "Offline", amount: 50000, favour: "Manish Aavanti", enteredBy: "Manish Aavanti", status: "Paid" },
+    { id: 9920, organization: "Education Department", paymentDate: "08-04-2025 12:00:00", type: "EMD", mode: "Offline", amount: 120000, favour: "Air Force", enteredBy: "Palak Shah", status: "Refund" },
+    { id: 6763, organization: "South Central Railway", paymentDate: "08-04-2025 12:00:00", type: "EMD", mode: "Online", amount: 50000, favour: "ISTPL", enteredBy: "Samarth Patel", status: "Paid" },
+    { id: 6814, organization: "North Eastern Railways", paymentDate: "08-04-2025 06:00:00", type: "EMD", mode: "Offline", amount: 300000, favour: "Department", enteredBy: "Palak Shah", status: "Paid" },
+    { id: 9920, organization: "Education Department", paymentDate: "05-04-2025 12:00:00", type: "EMD", mode: "Offline", amount: 800000, favour: "Indian Army", enteredBy: "Palak Shah", status: "Paid" }
+  ];
+
+  // Sales MIS Data
+  const salesMISData = [
+    { userName: "Abc Zdc", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+    { userName: "Ashfaque Construction", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+    { userName: "Akash Kumar", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 }
+  ];
+
+  // Document Management Data
+  const documentBriefCase = [
+    { id: 1, folderName: "04-04-2024", subFolderName: "-", fileName: "-", createdBy: "Palak Shah", createdDate: "04-04-2024 14:36", expiryDate: "30-04-2025", remarks: "test" },
+    { id: 2, folderName: "Company General Documents", subFolderName: "-", fileName: "Company_Cert.jpg", createdBy: "Palak Shah", createdDate: "03-04-2024 17:50", expiryDate: "20-06-2025", remarks: "k" },
+    { id: 3, folderName: "Vishalo_323469", subFolderName: "-", fileName: "Vishalo_Test.Pdf", createdBy: "Palak Shah", createdDate: "02-04-2024 15:49", expiryDate: "30-04-2025", remarks: "Test" }
+  ];
+
+  // Task Management Data
+  const taskData = [
+    { tenderId: 6702, tenderName: "Purchase Of Open Gym In Outdoor Stadium, Gujarat An...", clientName: "Education Department", location: "Gujarat", dueDate: "07-04-2025 19:15", taskWork: "EMD", assigneeName: "Palak Shah", assignerName: "Palak Shah", createdDate: "04-04-2025 13:58", deadline: "07-04-2025 12:00", status: "Under Process" },
+    { tenderId: 6763, tenderName: "Supply Of Centrifuge Air Station (as Filter) New...", clientName: "South Central Railway", location: "Andhra Pradesh", dueDate: "17-04-2025 09:00", taskWork: "ABC Enterprise - Dealer Price", assigneeName: "Manish Aavanti", assignerName: "Manish Aavanti", createdDate: "07-04-2025 11:58", deadline: "12-04-2025 12:00", status: "Under Process" }
+  ];
+
+  // Approval Data
+  const approvalData = [
+    { tenderId: 25320, approvalFor: "Approval This Tender", approvalFrom: "Mitir Modi", inFlow: "Mitir Modi", requester: "Palak Shah", requestDate: "12-03-2025 11:37", actionDate: "13-03-2025 12:00", deadline: "13-03-2025 12:00", status: "Pending" },
+    { tenderId: 195, approvalFor: "Tendors Bidding", approvalFrom: "Yogesh Gadhavi", inFlow: "Yogesh Gadhvi", requester: "Palak Shah", requestDate: "18-03-2025 10:25", actionDate: "19-03-2025 12:00", deadline: "19-03-2025 12:00", status: "Pending" }
+  ];
+
+  // User Management Data
+  const userData = [
+    { name: "Amit Mishra", loginUserId: "mamit9464@gmail.com", email: "mamit9464@gmail.com", contact: "9510943496", department: "Tender Department", designation: "Tender EA", roleName: "Tender Filing", createdDate: "08-04-2025", status: "Active" },
+    { name: "Binal Vasanwala", loginUserId: "binal@tender247.com", email: "binal@tender247.com", contact: "9726804000", department: "Tender - Binal", designation: "Sales Manager", roleName: "Tender - Bidding", createdDate: "08-04-2025", status: "Active" },
+    { name: "Tushar Sahayata", loginUserId: "tushar@tender247.com", email: "tushar@tender247.com", contact: "9510979431", department: "Finance - Tushar", designation: "Finance Manager", roleName: "Finance MF", createdDate: "35-03-2025", status: "Active" }
+  ];
+
+  const menuItems = [
+    { id: 'dashboard', label: 'Sales Dashboard', icon: BarChart3 },
+    { id: 'finance-dashboard', label: 'Finance Dashboard', icon: DollarSign },
+    { id: 'tender-listing', label: 'Tender', icon: FileText },
+    { id: 'tender-results', label: 'Tender Result', icon: Award },
+    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'tender-task', label: 'Tender Task', icon: CheckCircle },
+    { id: 'finance', label: 'Finance Management', icon: DollarSign },
+    { id: 'mis', label: 'MIS', icon: BarChart3 },
+    { id: 'documents', label: 'Document Management', icon: FileText },
+    { id: 'tasks', label: 'Task', icon: CheckCircle },
+    { id: 'approvals', label: 'Approval\'s', icon: CheckCircle },
+    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'oem', label: 'OEM Management', icon: Building },
+    { id: 'utility', label: 'Utility', icon: Settings },
+    { id: 'users', label: 'User Management', icon: Users },
+    { id: 'add-tender', label: 'Tender Add / Modify', icon: Plus }
+  ];
+
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Welcome</h1>
+          <h2 className="text-xl">Palak Shah!</h2>
+        </div>
+        <div className="text-right">
+          <img src="/api/placeholder/120/120" alt="Welcome illustration" className="w-24 h-24 rounded-full bg-white/20" />
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Fresh Tender</p>
+              <p className="text-3xl font-bold text-blue-600">{dashboardStats.freshTenders}</p>
+            </div>
+            <FileText className="h-12 w-12 text-blue-500" />
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border bg-blue-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Live Tender</p>
+              <p className="text-3xl font-bold text-green-600">{dashboardStats.liveTenders}</p>
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded mt-1 inline-block">New</span>
+            </div>
+            <Clock className="h-12 w-12 text-green-500" />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Tender Result</p>
+              <p className="text-3xl font-bold text-orange-600">{dashboardStats.tenderResults}</p>
+            </div>
+            <Award className="h-12 w-12 text-orange-500" />
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Submitted Tender</p>
+              <p className="text-3xl font-bold text-purple-600">{dashboardStats.submittedTenders}</p>
+            </div>
+            <CheckCircle className="h-12 w-12 text-purple-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-500">My Tender</p>
+            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">New</span>
+          </div>
+          <p className="text-2xl font-bold">{dashboardStats.myTenders}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-500">In Process Tender</p>
+            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">New</span>
+          </div>
+          <p className="text-2xl font-bold">{dashboardStats.inProcessTenders}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-500">Assigned To Team</p>
+            <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">New</span>
+          </div>
+          <p className="text-2xl font-bold">{dashboardStats.assignedToTeam}</p>
+        </div>
+      </div>
+
+      {/* Calendar and Today's Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">April 2025</h3>
+            <div className="flex space-x-2">
+              <button className="p-1 hover:bg-gray-100 rounded">
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <button className="p-1 hover:bg-gray-100 rounded">
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-1 text-center text-sm">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+              <div key={day} className="p-2 font-medium text-gray-500">{day}</div>
+            ))}
+            {Array.from({length: 30}, (_, i) => (
+              <div key={i} className={`p-2 hover:bg-blue-50 cursor-pointer rounded ${i === 7 ? 'bg-blue-100 text-blue-700 font-bold' : i === 14 || i === 22 ? 'bg-green-100 text-green-700' : ''}`}>
+                {i + 1}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold mb-4 text-blue-600">Today's Activity</h3>
+          <div className="space-y-4">
+            {todayActivities.map((activity, index) => (
+              <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-sm font-medium">Tender Assigned to team</p>
+                  <span className={`text-xs px-2 py-1 rounded ${activity.status === 'Completed' ? 'bg-green-100 text-green-800' : activity.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>
+                    {activity.status}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">Tender ID: {activity.id}</p>
+                <p className="text-xs text-gray-500">Assign To: {activity.assignee}</p>
+                <p className="text-xs text-gray-500">Assign Date & Time: {activity.dueDate}</p>
+                <p className="text-xs text-gray-500">Submission Date: {activity.submissionDate}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFinanceDashboard = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Finance Dashboard</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      {/* EMD & SD Summary Row */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-sm text-gray-500 mb-2">EMD Payment & Refund Summary</h3>
+          <p className="text-sm text-blue-600 mb-1">Paid EMD: ₹ {financeStats.emdPayment.paid.toLocaleString()}</p>
+          <p className="text-sm text-blue-600">Refund EMD: ₹ {financeStats.emdPayment.refund.toLocaleString()}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-sm text-gray-500 mb-2">SD Payment & Refund Summary</h3>
+          <p className="text-sm text-green-600 mb-1">Paid SD: ₹ {financeStats.sdPayment.paid}</p>
+          <p className="text-sm text-green-600">Refund SD: ₹ {financeStats.sdPayment.refund}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-sm text-gray-500 mb-2">EMD Under Process</h3>
+          <p className="text-lg font-bold text-orange-600">Under Process EMD: ₹ {financeStats.emdUnderProcess.toLocaleString()}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-sm text-gray-500 mb-2">EMD & SD Forfeited</h3>
+          <p className="text-sm text-red-600 mb-1">Forfeited EMD: ₹ {financeStats.emdForfeited}</p>
+          <p className="text-sm text-red-600">Refund SD: ₹ {financeStats.sdForfeited}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-sm text-gray-500 mb-2">Expired EMD & SD</h3>
+          <p className="text-sm text-gray-600 mb-1">Expired EMD: ₹ {financeStats.expired.emd.toLocaleString()}</p>
+          <p className="text-sm text-gray-600">Expired SD: ₹ {financeStats.expired.sd}</p>
+        </div>
+      </div>
+
+      {/* Finance Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Building className="h-8 w-8 text-blue-600" />
+          </div>
+          <h3 className="font-semibold mb-2">Bank Guarantee</h3>
+          <p className="text-sm text-gray-500 mb-1">New Request: {financeStats.newRequests.bankGuarantee}</p>
+          <p className="text-sm text-gray-500">Used B.G: {financeStats.usedRequests.bankGuarantee}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FileText className="h-8 w-8 text-green-600" />
+          </div>
+          <h3 className="font-semibold mb-2">Security Deposit</h3>
+          <p className="text-sm text-gray-500 mb-1">New Request: {financeStats.newRequests.securityDeposit}</p>
+          <p className="text-sm text-gray-500">Used S.D: {financeStats.usedRequests.securityDeposit}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
+          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <DollarSign className="h-8 w-8 text-purple-600" />
+          </div>
+          <h3 className="font-semibold mb-2">Fees</h3>
+          <p className="text-sm text-gray-500 mb-1">New Request: {financeStats.newRequests.fees.toLocaleString()}</p>
+          <p className="text-sm text-gray-500">Used Fees: {financeStats.usedRequests.fees}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border text-center">
+          <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Settings className="h-8 w-8 text-orange-600" />
+          </div>
+          <h3 className="font-semibold mb-2">Others</h3>
+          <p className="text-sm text-gray-500 mb-1">New Request: {financeStats.newRequests.others}</p>
+          <p className="text-sm text-gray-500">Used Other: {financeStats.usedRequests.others}</p>
+        </div>
+      </div>
+
+      {/* EMD Management */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <DollarSign className="h-8 w-8 text-green-600" />
+        </div>
+        <h3 className="text-lg font-semibold mb-4 text-center">EMD</h3>
+        <div className="text-center space-y-2">
+          <p className="text-sm text-gray-600">New Request: {financeStats.newRequests.emd}</p>
+          <p className="text-sm text-gray-600">Used Emd: {financeStats.usedRequests.emd}</p>
+        </div>
+      </div>
+
+      {/* Today's Activity */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-4 text-blue-600">Today's Activity</h3>
+        <div className="space-y-4">
+          {todayActivities.slice(0, 3).map((activity, index) => (
+            <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+              <p className="text-sm font-medium">Tender Assigned to team</p>
+              <p className="text-xs text-gray-500">Tender ID: {activity.id}</p>
+              <p className="text-xs text-gray-500">Assign To: {activity.assignee}</p>
+              <p className="text-xs text-gray-500">Assign Date & Time: {activity.dueDate}</p>
+              <p className="text-xs text-gray-500">Submission Date: {activity.submissionDate}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Calendar */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">April 2025</h3>
+          <div className="flex space-x-2">
+            <button className="p-1 hover:bg-gray-100 rounded">
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <button className="p-1 hover:bg-gray-100 rounded">
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 gap-1 text-center text-sm">
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+            <div key={day} className="p-2 font-medium text-gray-500">{day}</div>
+          ))}
+          {Array.from({length: 30}, (_, i) => (
+            <div key={i} className={`p-2 hover:bg-blue-50 cursor-pointer rounded ${i === 8 ? 'bg-green-100 text-green-700' : i === 15 || i === 17 || i === 25 ? 'bg-orange-100 text-orange-700' : ''}`}>
+              {i + 1}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTenderListing = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Tender</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      {/* Comprehensive Filters */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Tender Filter</h3>
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            {showFilters ? '▲' : '▼'}
+          </button>
+        </div>
+        
+        {showFilters && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <input 
+                type="text" 
+                placeholder="Search by Keywords" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+              <input 
+                type="text" 
+                placeholder="Reference Number" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+              <select className="border border-gray-300 rounded-lg px-3 py-2">
+                <option>Select State</option>
+                <option>West Bengal</option>
+                <option>Bihar</option>
+                <option>Uttar Pradesh</option>
+                <option>All States</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="City" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <input 
+                type="text" 
+                placeholder="Department Name" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+              <select className="border border-gray-300 rounded-lg px-3 py-2">
+                <option>Tender Status</option>
+                <option>Fresh</option>
+                <option>Live</option>
+                <option>Submitted</option>
+                <option>In Process</option>
+              </select>
+              <select className="border border-gray-300 rounded-lg px-3 py-2">
+                <option>Assign By</option>
+                <option>Palak Shah</option>
+                <option>Admin</option>
+              </select>
+              <select className="border border-gray-300 rounded-lg px-3 py-2">
+                <option>Assign To</option>
+                <option>Yogesh Gadhavi</option>
+                <option>Vinisha Patel</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <input 
+                type="text" 
+                placeholder="Tender Id" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+              <input 
+                type="text" 
+                placeholder="Website" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+              <div className="flex space-x-2">
+                <input 
+                  type="date" 
+                  placeholder="Opening From" 
+                  className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+                />
+                <span className="text-gray-500 self-center">to</span>
+                <input 
+                  type="date" 
+                  placeholder="Opening To" 
+                  className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+                />
+              </div>
+              <select className="border border-gray-300 rounded-lg px-3 py-2">
+                <option>Ownership</option>
+                <option>Central Government</option>
+                <option>State Government</option>
+                <option>Private</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <select className="border border-gray-300 rounded-lg px-3 py-2">
+                <option>Quantity (>=)</option>
+                <option>1</option>
+                <option>10</option>
+                <option>100</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Enter Quantity" 
+                className="border border-gray-300 rounded-lg px-3 py-2"
+              />
+              <div className="flex space-x-2">
+                <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+                  <option>Tender Value (=)</option>
+                  <option>>=</option>
+                  <option><=</option>
+                  <option>=</option>
+                </select>
+                <input 
+                  type="text" 
+                  placeholder="Value" 
+                  className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+                />
+                <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+                  <option>Lakh</option>
+                  <option>Crore</option>
+                  <option>Thousand</option>
+                </select>
+              </div>
+              <div className="flex space-x-2">
+                <span className="text-gray-500 self-center">To</span>
+                <input 
+                  type="text" 
+                  placeholder="Value" 
+                  className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+                />
+                <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+                  <option>Lakh</option>
+                  <option>Crore</option>
+                  <option>Thousand</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Checkboxes */}
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="gem" value="all" className="rounded" />
+                <span className="text-sm">All</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="gem" value="gem" className="rounded" />
+                <span className="text-sm">GeM</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="gem" value="non-gem" className="rounded" />
+                <span className="text-sm">Non GeM</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">MSME Exemption</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Startup Exemption</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="startup" value="yes" className="rounded" />
+                <span className="text-sm">Yes</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="radio" name="startup" value="no" className="rounded" />
+                <span className="text-sm">No</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Manual Entry</span>
+              </label>
+            </div>
+
+            <div className="flex space-x-4">
+              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                Search
+              </button>
+              <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50">
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Export Button */}
+      <div className="flex justify-end">
+        <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+          <Download className="h-4 w-4 mr-2" />
+          Export To Excel
+        </button>
+      </div>
+
+      {/* Tender Tabs */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {[
+              { id: 'fresh', label: 'Fresh', count: null },
+              { id: 'live', label: 'Live', count: 55 },
+              { id: 'archive', label: 'Archive', count: null },
+              { id: 'interested', label: 'Interested', count: null }
+            ].map((tab) => (
+              <button 
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id 
+                    ? 'border-blue-500 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.label} {tab.count && `(${tab.count})`}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Sort Options */}
+        <div className="px-6 py-3 border-b border-gray-200 flex justify-between items-center">
+          <span className="text-sm text-gray-500">Showing results</span>
+          <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+            <option>Value ↓</option>
+            <option>Date ↓</option>
+            <option>Deadline ↓</option>
+          </select>
+        </div>
+
+        {/* Tender List */}
+        <div className="p-6">
+          <div className="space-y-4">
+            {sampleTenders.map((tender) => (
+              <div key={tender.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <input type="checkbox" className="rounded" />
+                      <span className="text-lg font-bold text-blue-600">#{tender.id}</span>
+                      <span className="text-sm text-gray-500">|</span>
+                      <span className="text-sm text-gray-500">{tender.dueDate}</span>
+                      <span className="text-sm text-red-500 font-medium">5 Days Left</span>
+                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">
+                        EMD: ₹ {tender.value.toLocaleString()}
+                      </span>
+                      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">
+                        {tender.status}
+                      </span>
+                      <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                        {tender.type}
+                      </span>
+                    </div>
+                    
+                    <h3 className="font-medium text-gray-900 mb-3 text-base leading-relaxed">
+                      {tender.title}
+                    </h3>
+                    
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{tender.organization}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end space-y-3 ml-6">
+                    <span className="text-lg font-bold text-gray-900">
+                      Tender Id - {tender.tenderId || tender.id}
+                    </span>
+                    
+                    <div className="flex space-x-2">
+                      <button 
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button 
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Download"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
+                      <button 
+                        className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        title="Documents"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </button>
+                      <button 
+                        className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        title="Share"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTenderDetails = () => (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <button 
+          onClick={() => setSelectedTender(null)}
+          className="flex items-center text-blue-600 hover:text-blue-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back
+        </button>
+        <h2 className="text-2xl font-bold">Tender Details</h2>
+        <div className="ml-auto text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      {/* Tender Features Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 space-y-6">
+          {/* Tender Details Section */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Tender Details</h3>
+              <button className="text-gray-400 hover:text-gray-600">
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="mb-4">
+                  <label className="text-sm text-gray-500">Tender ID</label>
+                  <p className="font-medium">26500</p>
+                </div>
+                <div className="mb-4">
+                  <label className="text-sm text-gray-500">Website</label>
+                  <p className="text-blue-600">Please Refer Tender Documents</p>
+                </div>
+                <div className="mb-4">
+                  <label className="text-sm text-gray-500">Brief</label>
+                  <p className="text-sm">Construction of Panchayat Santar Building - I (Hindi Image)</p>
+                </div>
+              </div>
+              
+              <div>
+                <div className="mb-4">
+                  <label className="text-sm text-gray-500">Tender Status</label>
+                  <p className="font-medium">In Process</p>
+                </div>
+                <div className="mb-4">
+                  <label className="text-sm text-gray-500">Reference No.</label>
+                  <p className="font-medium">-</p>
+                </div>
+                <div className="mb-4">
+                  <label className="text-sm text-gray-500">Tender Authority</label>
+                  <p className="font-medium">Planning And Development Department</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Generated Summary */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">AI Generated Tender Summary / Eligibility Criteria</h3>
+              <div className="flex space-x-2">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+                  GENERATE
+                </button>
+                <button className="text-gray-400 hover:text-gray-600">
+                  <ChevronDown className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Values */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Key Values *</h3>
+              <button className="text-gray-400 hover:text-gray-600">
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="text-sm text-gray-500">Document Fees</label>
+                <p className="font-bold text-lg">₹ 10.00 Thousand</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Earnest Money Deposits (EMD)</label>
+                <p className="font-bold text-lg">₹ 2.68 Lakh</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Estimated Cost</label>
+                <p className="font-bold text-lg">₹ 2.34 CR</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Dates */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Key Dates *</h3>
+              <button className="text-gray-400 hover:text-gray-600">
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="text-sm text-gray-500">Start Date Of Document Collection</label>
+                <p className="font-medium">Refer Document</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Last Date For Submission</label>
+                <p className="font-medium">16-04-2025</p>
+              </div>
+              <div>
+                <label className="text-sm text-gray-500">Opening Date</label>
+                <p className="font-medium">16-04-2025</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-500">
+              <p>*The Estimated Cost Values & Dates Are Indicative Only. Please Read Tender Document For Accurate Information</p>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Location</h3>
+              <button className="text-gray-400 hover:text-gray-600">
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500">Location#</label>
+              <p className="font-medium">Jharkhand - Bihar</p>
+            </div>
+          </div>
+
+          {/* Tender Document */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Tender Document</h3>
+              <button className="text-gray-400 hover:text-gray-600">
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-500">NIT</span>
+              <button className="text-blue-600 hover:text-blue-800 underline">
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tender Features Sidebar */}
+        <div className="space-y-4">
+          <div className="bg-blue-600 text-white p-4 rounded-lg">
+            <h3 className="font-semibold mb-4">TENDER FEATURES</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span className="text-sm">Assign</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Heart className="h-4 w-4" />
+                <span className="text-sm">Interested</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Bell className="h-4 w-4" />
+                <span className="text-sm">Set Reminder</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <DollarSign className="h-4 w-4" />
+                <span className="text-sm">Request To Finance</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">Task Allocation</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Phone className="h-4 w-4" />
+                <span className="text-sm">Kick Off Call</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm">Tender Status</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">Request For Approvals</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm">Tender Legal</span>
+              </div>
+            </div>
+          </div>
+
+          <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700">
+            VIEW RESPONSE
+          </button>
+
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <h4 className="font-semibold mb-2 text-blue-600">INSIGHTS</h4>
+            <div className="text-sm space-y-2">
+              <p><strong>Maximum win:</strong></p>
+              <ul className="list-disc list-inside text-gray-600 space-y-1">
+                <li>Axial Steamsher</li>
+                <li>Mass Machine</li>
+                <li>Modern Machine Private Limited</li>
+                <li>M/S Shiv Shakti Construction</li>
+                <li>Shama Chantal Contract Private Limited</li>
+              </ul>
+              
+              <p className="mt-4"><strong>Probable Participants:</strong></p>
+              <ul className="list-disc list-inside text-gray-600 space-y-1">
+                <li>Axial Steamsher</li>
+                <li>Mass Machine</li>
+                <li>Modern Machine Private Limited</li>
+                <li>M/S Shiv Shakti Construction</li>
+                <li>Shama Chantal Contract Private Limited</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPrepareResponse = () => (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <button 
+          onClick={() => setActiveModule('tender-listing')}
+          className="flex items-center text-blue-600 hover:text-blue-800"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back
+        </button>
+        <h2 className="text-2xl font-bold">Prepare Response</h2>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2">
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <h3 className="text-lg font-semibold mb-6">Prepare CheckList</h3>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 text-sm font-medium text-gray-500">SR. NO.</th>
+                    <th className="text-left py-3 text-sm font-medium text-gray-500">TYPE DOCUMENT NAME</th>
+                    <th className="text-left py-3 text-sm font-medium text-gray-500">UPLOAD DOCUMENT</th>
+                    <th className="text-left py-3 text-sm font-medium text-gray-500">VIEW DOCUMENT</th>
+                    <th className="text-left py-3 text-sm font-medium text-gray-500">DELETE DOCUMENT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    'MSME',
+                    'PAN',
+                    'GST',
+                    'Turnover',
+                    'Balance Sheet',
+                    'Annexure 1',
+                    'MII',
+                    'ISO'
+                  ].map((doc, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-3">{index + 1}</td>
+                      <td className="py-3">
+                        <input 
+                          type="text" 
+                          defaultValue={doc}
+                          className="border border-gray-300 rounded px-3 py-1 w-full"
+                        />
+                      </td>
+                      <td className="py-3">
+                        <input type="file" className="hidden" id={`upload-${index}`} />
+                        <label 
+                          htmlFor={`upload-${index}`}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer hover:bg-blue-700"
+                        >
+                          Upload
+                        </label>
+                      </td>
+                      <td className="py-3">
+                        <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                          View
+                        </button>
+                      </td>
+                      <td className="py-3">
+                        <button className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <button className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              Add Check List
+            </button>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <h4 className="font-semibold mb-3">Tender ID: 6765</h4>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-gray-500">Brief</label>
+                <p className="text-sm">Supply of complete goin set for all medical all as per consisting of 17 items as per attached documents (in 48 pchs Vol. as per drg.)</p>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500">Pre-Qualification Criteria</label>
+                <p className="text-sm text-blue-600">Refer Document</p>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500">See More Details</label>
+                <p className="text-sm text-blue-600">Tender Document : Click Here</p>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500">Brief value</label>
+                <p className="text-sm">Refer Document</p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex space-x-2">
+              <button className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700">
+                Technical
+              </button>
+              <button className="bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-300">
+                Commercial
+              </button>
+            </div>
+
+            <button className="w-full mt-3 bg-green-600 text-white py-2 rounded font-medium hover:bg-green-700">
+              Mark As Submitted Tender
+            </button>
+          </div>
+
+          <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700">
+            Generate Response
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderBOQSearch = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Search Item From BOQ</h2>
+      
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Tender BOQ Search</h3>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">IndiaUser.Com</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+          <input 
+            type="text" 
+            placeholder="revolving chair"
+            className="border border-gray-300 rounded-lg px-3 py-2"
+          />
+          <input 
+            type="text" 
+            placeholder="Search Within"
+            className="border border-gray-300 rounded-lg px-3 py-2"
+          />
+          <input 
+            type="text" 
+            placeholder="BOQ Id"
+            className="border border-gray-300 rounded-lg px-3 py-2"
+          />
+          <select className="border border-gray-300 rounded-lg px-3 py-2">
+            <option>Select State</option>
+            <option>Jharkhand</option>
+            <option>Karnataka</option>
+            <option>All States</option>
+          </select>
+          <select className="border border-gray-300 rounded-lg px-3 py-2">
+            <option>Select Tendering Authority</option>
+            <option>Central Government</option>
+            <option>State Government</option>
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="flex space-x-2">
+            <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+              <option>Tender Value (>=)</option>
+              <option>>=</option>
+              <option><=</option>
+            </select>
+            <input 
+              type="text" 
+              placeholder="Value"
+              className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+            />
+            <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+              <option>Lakh</option>
+              <option>Crore</option>
+            </select>
+          </div>
+          <div className="flex space-x-2">
+            <span className="text-gray-500 self-center">To</span>
+            <input 
+              type="text" 
+              placeholder="Value"
+              className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+            />
+            <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+              <option>Lakh</option>
+              <option>Crore</option>
+            </select>
+          </div>
+          <div className="flex space-x-2">
+            <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+              <option>Enter Quantity (>=)</option>
+              <option>>=</option>
+              <option><=</option>
+            </select>
+            <input 
+              type="text" 
+              placeholder="Quantity"
+              className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4 mb-4">
+          <label className="flex items-center space-x-2">
+            <input type="checkbox" className="rounded" />
+            <span className="text-sm">Exact Search</span>
+          </label>
+        </div>
+
+        <div className="flex space-x-4 mb-6">
+          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            SEARCH
+          </button>
+          <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50">
+            CLEAR
+          </button>
+          <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+            ADVANCE SEARCH
+          </button>
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Tender BOQ (117)</h4>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Sort by:</span>
+              <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                <option>DEADLINE: DESCENDING</option>
+                <option>VALUE: ASCENDING</option>
+                <option>DATE: DESCENDING</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="bg-blue-50 p-4 rounded mb-4">
+            <h5 className="font-medium text-blue-900 mb-2">Result BOQ</h5>
+          </div>
+
+          <div className="space-y-4">
+            {boqResults.map((result, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="font-bold text-blue-600">{index + 1})</span>
+                      <span className="font-bold text-blue-600">BOQ ID: {result.id}</span>
+                      <span className="text-sm text-gray-500">| Submission Date: {result.submissionDate}</span>
+                      <span className="text-sm text-gray-500">| Tender Value: {result.tenderValue}</span>
+                      <span className="text-sm text-gray-500">| T247 ID: {result.t247Id}</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-2">{result.description}</p>
+                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <span>Item Quantity: {result.quantity}</span>
+                      <span>Item Category Value: {result.category}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <button className="text-blue-600 hover:text-blue-800 text-sm underline">
+                        BOQ Document
+                      </button>
+                      <span className="text-gray-400">|</span>
+                      <button className="text-blue-600 hover:text-blue-800 text-sm underline">
+                        View Tender Document
+                      </button>
+                      <span className="text-gray-400">|</span>
+                      <span className="text-sm text-gray-600">{result.location}</span>
+                    </div>
+                  </div>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-4">
+                    Quote Your Price
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderActualTender = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Actual Tender</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">IndiaUser.Com</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-4">Indian Tender</h3>
+        
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="text-center p-4 bg-gray-50 rounded">
+            <div className="text-2xl font-bold text-gray-600">0</div>
+            <div className="text-sm text-gray-500">*Not Data</div>
+            <div className="text-xs text-gray-400">Select Mail Data</div>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded">
+            <div className="text-2xl font-bold text-blue-600">32.40K</div>
+            <div className="text-sm text-gray-500">Today Tenders</div>
+            <div className="text-xs text-gray-400">(08-04-2025)</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded">
+            <div className="text-2xl font-bold text-green-600">1.69 Lakh</div>
+            <div className="text-sm text-gray-500">Active Tenders</div>
+            <div className="text-xs text-gray-400">(2024)</div>
+          </div>
+          <div className="text-center p-4 bg-orange-50 rounded">
+            <div className="text-2xl font-bold text-orange-600">51.51 Lakh</div>
+            <div className="text-sm text-gray-500">Closed Tenders</div>
+            <div className="text-xs text-gray-400">(2024)</div>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded">
+            <div className="text-2xl font-bold text-purple-600">154</div>
+            <div className="text-sm text-gray-500">Interested Tender</div>
+            <div className="text-xs text-gray-400">21 Reminders</div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Tender Filters</h4>
+            <button className="text-blue-600 hover:text-blue-800">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+            <input 
+              type="text" 
+              placeholder="86964458"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <input 
+              type="text" 
+              placeholder="Organization Tender ID"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Select State</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Select City</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Select Ownership</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Select Department</option>
+            </select>
+            <div className="flex space-x-2">
+              <input 
+                type="date" 
+                className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+              />
+              <span className="text-gray-500 self-center">to</span>
+              <input 
+                type="date" 
+                className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+              />
+            </div>
+            <input 
+              type="text" 
+              placeholder="Website"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <div className="flex space-x-2">
+              <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+                <option>Quantity (>=)</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Enter Quantity"
+                className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+              />
+            </div>
+          </div>
+
+          <div className="flex space-x-4 mb-4">
+            <div className="flex space-x-2">
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="gem-type" value="all" className="rounded" />
+                <span className="text-sm">All</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="gem-type" value="gem" className="rounded" />
+                <span className="text-sm">GeM</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="gem-type" value="non-gem" className="rounded" />
+                <span className="text-sm">Non GeM</span>
+              </label>
+            </div>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-1">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">MSME Exemption</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">AI Summary</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Startup Exemption</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">BOQ</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex space-x-4">
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              SEARCH
+            </button>
+            <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50">
+              CLEAR
+            </button>
+            <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+              ADVANCE SEARCH
+            </button>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="border-t pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="font-semibold text-blue-600">Active (1)</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">PRICE: HIGH TO LOW</span>
+              <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                <option>PRICE: HIGH TO LOW</option>
+                <option>PRICE: LOW TO HIGH</option>
+                <option>DATE: LATEST</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="font-bold text-blue-600">1)</span>
+                  <span className="font-bold">Bid Value: ₹ 6.44 Cr</span>
+                  <span className="text-sm text-gray-500">| EMD: ₹ 6.44 Lakh</span>
+                  <span className="text-sm text-gray-500">| Due: 09-04-2025</span>
+                  <span className="text-sm text-gray-500">| Days Left</span>
+                  <span className="text-sm text-gray-500">| T247 ID: 86964458</span>
+                </div>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Construction And Commissioning Of Fecal Sludge Treatment Plant Of Capacity 30 M3/Day At Purni Telarga
+                </h4>
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <span>🏢 Urban Development Authority - Koderma, Jharkhand, India</span>
+                  <span>|</span>
+                  <button className="text-blue-600 hover:text-blue-800 underline">
+                    AI Summary / Eligibility Criteria
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col items-end space-y-2 ml-4">
+                <button className="text-blue-600 hover:text-blue-800 text-sm">
+                  Set Reminder
+                </button>
+                <div className="flex space-x-2">
+                  <button className="p-1 text-blue-600 hover:bg-blue-50 rounded">
+                    <Heart className="h-4 w-4" />
+                  </button>
+                  <button className="p-1 text-green-600 hover:bg-green-50 rounded">
+                    <Share2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCompetitorAnalysis = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Competitor analytical Report - Company Profile</h2>
+      
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold">Company Profile</h3>
+          <div className="flex space-x-4">
+            <select className="border border-gray-300 rounded px-3 py-2">
+              <option>2024-2025</option>
+              <option>2023-2024</option>
+            </select>
+            <div className="flex space-x-2">
+              <input type="date" className="border border-gray-300 rounded px-3 py-2" />
+              <span className="self-center">to</span>
+              <input type="date" className="border border-gray-300 rounded px-3 py-2" />
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mb-8">
+          <h4 className="text-2xl font-bold text-gray-800 mb-4">Geeken Seating Collection Private Limited</h4>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Search Company
+          </button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-6 mb-8">
+          <div className="text-center">
+            <div className="mb-2">
+              <div className="w-full bg-blue-100 h-8 rounded flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-blue-600" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 mb-1">Participated Tenders</div>
+            <div className="text-sm text-gray-500 mb-1">307 Tender</div>
+            <div className="font-bold text-blue-600">₹ 440.38 Cr</div>
+          </div>
+          
+          <div className="text-center">
+            <div className="mb-2">
+              <div className="w-full bg-green-100 h-8 rounded flex items-center justify-center">
+                <Award className="h-4 w-4 text-green-600" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 mb-1">Awarded Tenders</div>
+            <div className="text-sm text-gray-500 mb-1">65 Tender</div>
+            <div className="font-bold text-green-600">₹ 40.59 Cr</div>
+          </div>
+
+          <div className="text-center">
+            <div className="mb-2">
+              <div className="w-full bg-orange-100 h-8 rounded flex items-center justify-center">
+                <XCircle className="h-4 w-4 text-orange-600" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 mb-1">Lost Tenders</div>
+            <div className="text-sm text-gray-500 mb-1">140 Tender</div>
+            <div className="font-bold text-orange-600">₹ 294.56 Cr</div>
+          </div>
+
+          <div className="text-center">
+            <div className="mb-2">
+              <div className="w-full bg-purple-100 h-8 rounded flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-purple-600" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 mb-1">L1 Bids</div>
+            <div className="text-sm text-gray-500 mb-1">9 Tender</div>
+            <div className="font-bold text-purple-600">₹ 8.34 Cr</div>
+          </div>
+
+          <div className="text-center">
+            <div className="mb-2">
+              <div className="w-full bg-indigo-100 h-8 rounded flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-indigo-600" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 mb-1">Financial Bids</div>
+            <div className="text-sm text-gray-500 mb-1">78 Tender</div>
+            <div className="font-bold text-indigo-600">₹ 44.65 Cr</div>
+          </div>
+
+          <div className="text-center">
+            <div className="mb-2">
+              <div className="w-full bg-pink-100 h-8 rounded flex items-center justify-center">
+                <FileText className="h-4 w-4 text-pink-600" />
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 mb-1">Technical Bids</div>
+            <div className="text-sm text-gray-500 mb-1">14 Tender</div>
+            <div className="font-bold text-pink-600">₹ 46.57 Cr</div>
+          </div>
+        </div>
+
+        {/* Charts and Tables Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* State Wise Result */}
+          <div>
+            <h5 className="font-semibold mb-4">State Wise Result</h5>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-green-600 text-white">
+                  <tr>
+                    <th className="px-3 py-2 text-left">State Name ↑</th>
+                    <th className="px-3 py-2 text-left">Published Tender ↑</th>
+                    <th className="px-3 py-2 text-left">Participated Tender ↓</th>
+                    <th className="px-3 py-2 text-left">Awarded Tender ↑</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {companyProfiles[0].stateWiseResults.map((state, index) => (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="px-3 py-2">{state.state}</td>
+                      <td className="px-3 py-2">{state.published}</td>
+                      <td className="px-3 py-2">{state.participated}</td>
+                      <td className="px-3 py-2">{state.awarded}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Tendering Ownership */}
+          <div>
+            <h5 className="font-semibold mb-4">Tendering Ownership</h5>
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Central Government</span>
+                    <span className="text-blue-600">●</span>
+                  </div>
+                  <div className="w-full bg-green-200 h-6 rounded"></div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span>State Government</span>
+                    <span className="text-green-600">●</span>
+                  </div>
+                  <div className="w-3/4 bg-green-200 h-6 rounded"></div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span>Corporation</span>
+                    <span className="text-orange-600">●</span>
+                  </div>
+                  <div className="w-1/4 bg-orange-200 h-6 rounded"></div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span>Trust</span>
+                  </div>
+                  <div className="w-1/6 bg-gray-200 h-6 rounded"></div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span>Co-Operative</span>
+                  </div>
+                  <div className="w-1/12 bg-gray-200 h-6 rounded"></div>
+                </div>
+                <div className="mt-4 flex justify-between text-xs text-gray-500">
+                  <span>0</span>
+                  <span>50</span>
+                  <span>100</span>
+                  <span>150</span>
+                  <span>200</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Departments */}
+          <div>
+            <h5 className="font-semibold mb-4">Top Departments</h5>
+            <div className="grid grid-cols-5 gap-2">
+              <div className="bg-green-500 h-16 rounded flex items-end justify-center">
+                <span className="text-white text-xs p-1">48</span>
+              </div>
+              <div className="bg-blue-500 h-12 rounded flex items-end justify-center">
+                <span className="text-white text-xs p-1">20</span>
+              </div>
+              <div className="bg-purple-500 h-10 rounded flex items-end justify-center">
+                <span className="text-white text-xs p-1">15</span>
+              </div>
+              <div className="bg-orange-500 h-8 rounded flex items-end justify-center">
+                <span className="text-white text-xs p-1">10</span>
+              </div>
+              <div className="bg-red-500 h-6 rounded flex items-end justify-center">
+                <span className="text-white text-xs p-1">5</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-5 gap-2 mt-2 text-xs text-gray-600">
+              <div className="text-center">Department of Labour</div>
+              <div className="text-center">Assam Materials Service Corporation Limited</div>
+              <div className="text-center">Department of Higher Education</div>
+              <div className="text-center">Indian Institute of Technology</div>
+              <div className="text-center">Central Public Works Department</div>
+            </div>
+          </div>
+
+          {/* Month-Wise Result */}
+          <div>
+            <h5 className="font-semibold mb-4">Month-Wise Result</h5>
+            <div className="flex items-end space-x-1 h-32">
+              {[8, 12, 6, 10, 15, 9, 11, 14, 7, 13, 5, 16].map((height, index) => (
+                <div key={index} className="bg-green-500 rounded-t" style={{height: `${height * 4}px`, width: '20px'}}></div>
+              ))}
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <span>Jan</span>
+              <span>Feb</span>
+              <span>Mar</span>
+              <span>Apr</span>
+              <span>May</span>
+              <span>Jun</span>
+              <span>Jul</span>
+              <span>Aug</span>
+              <span>Sep</span>
+              <span>Oct</span>
+              <span>Nov</span>
+              <span>Dec</span>
+            </div>
+          </div>
+
+          {/* Result Stages */}
+          <div>
+            <h5 className="font-semibold mb-4">Result Stages</h5>
+            <div className="relative w-48 h-48 mx-auto">
+              <div className="w-full h-full rounded-full" style={{
+                background: 'conic-gradient(from 0deg, #f97316 0deg 129.6deg, #22c55e 129.6deg 345.6deg, #3b82f6 345.6deg 360deg)'
+              }}>
+                <div className="absolute inset-8 bg-white rounded-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-sm font-medium">72.9%</div>
+                    <div className="text-xs text-gray-500">Awarded</div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 flex justify-center space-x-4 text-xs">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-orange-500 rounded mr-1"></div>
+                  <span>36%</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded mr-1"></div>
+                  <span>60%</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-500 rounded mr-1"></div>
+                  <span>4%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFinanceManagement = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Finance Management</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-6">Finance MIS</h3>
+        
+        {/* Search Filters */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Search</h4>
+            <button className="text-blue-600 hover:text-blue-800">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <input 
+              type="text" 
+              placeholder="Tender Id"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <input 
+              type="text" 
+              placeholder="Search Text"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Organization Name</option>
+              <option>Education Department</option>
+              <option>South Central Railway</option>
+              <option>North Eastern Railways</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>EMD</option>
+              <option>SD</option>
+              <option>BG</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Select Request From</option>
+              <option>Palak Shah</option>
+              <option>Manish Aavanti</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Select Request To</option>
+              <option>Finance</option>
+              <option>Admin</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Status</option>
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Refund</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Payment mode</option>
+              <option>Online</option>
+              <option>Offline</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <input 
+              type="date" 
+              placeholder="Payment Date From"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <input 
+              type="date" 
+              placeholder="Payment Date To"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <input 
+              type="text" 
+              placeholder="Favour Of"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <div className="flex space-x-2">
+              <select className="border border-gray-300 rounded-lg px-3 py-2 flex-1">
+                <option>Select Value</option>
+                <option>Equal</option>
+                <option>Greater Than</option>
+                <option>Less Than</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Amount"
+                className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+              />
+            </div>
+          </div>
+
+          <div className="flex space-x-4">
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              Search
+            </button>
+            <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Download Button */}
+        <div className="flex justify-end mb-4">
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+            <Download className="h-4 w-4 mr-2" />
+            Download File
+          </button>
+        </div>
+
+        {/* Finance Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">TENDER NO.</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ORGANIZATION</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">PAYMENT DATE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">TYPE OF PAYMENT</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">PAYMENT MODE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">AMOUNT</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">IN FAVOUR OF</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ENTERED BY</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">STATUS NAME</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {documentBriefCase.map((doc, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-sm">{doc.id}</td>
+                  <td className="px-4 py-3 text-sm">{doc.folderName}</td>
+                  <td className="px-4 py-3 text-sm">{doc.subFolderName}</td>
+                  <td className="px-4 py-3 text-sm">{doc.fileName}</td>
+                  <td className="px-4 py-3 text-sm">{doc.createdBy}</td>
+                  <td className="px-4 py-3 text-sm">{doc.createdDate}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className={`${doc.expiryDate === '28-02-2025' ? 'text-red-600 font-medium' : ''}`}>
+                      {doc.expiryDate}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">{doc.remarks}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex space-x-2">
+                      <button className="p-1 text-blue-600 hover:bg-blue-50 rounded">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-green-600 hover:bg-green-50 rounded">
+                        <Download className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-red-600 hover:bg-red-50 rounded">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Show</span>
+            <select className="border border-gray-300 rounded px-2 py-1 text-sm">
+              <option>50</option>
+              <option>25</option>
+              <option>100</option>
+            </select>
+            <span className="text-sm text-gray-500">Page 1 of 1</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Prev</button>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+          </div>
+        </div>
+
+        {/* Download File Button */}
+        <div className="mt-6">
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+            <Download className="h-4 w-4 mr-2" />
+            Download File
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTaskManagement = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Task</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-6">Task</h3>
+        
+        {/* Task Filter */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Task Filter</h4>
+            <button className="text-blue-600 hover:text-blue-800">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+            <Download className="h-4 w-4 mr-2" />
+            Export To Excel
+          </button>
+        </div>
+
+        {/* Task Status Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex space-x-8">
+            {[
+              { id: 'under-process', label: 'Under Process', count: 12 },
+              { id: 'under-review', label: 'Under Review', count: 7 },
+              { id: 'under-revision', label: 'Under Revision', count: 1 },
+              { id: 'approved', label: 'Approved', count: 3 },
+              { id: 'drop', label: 'Drop', count: 0 }
+            ].map((tab, index) => (
+              <button 
+                key={tab.id}
+                className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                  index === 0 
+                    ? 'border-blue-500 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Task Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">TENDER ID</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">TENDER NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CLIENT NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">LOCATION</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DUE DATE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">TASK WORK</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ASSIGNEE NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ASSIGNER NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CREATED DATE & TIME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DEADLINE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">STATUS</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {taskData.concat([
+                { tenderId: 6814, tenderName: "Supply Of Leasing Pad Shoe Aluminum Bronze Level...", clientName: "North Eastern Railways", location: "Uttar Pradesh", dueDate: "21-04-2025 00:00", taskWork: "Technical", assigneeName: "Palak Shah", assignerName: "Binal Vasanwala", createdDate: "07-04-2025 11:38", deadline: "10-04-2025 12:00", status: "Under Process" },
+                { tenderId: 9920, tenderName: "For Selection Of Transmission Service Provider (T...", clientName: "PFC Consulting Limited", location: "West Bengal", dueDate: "26-04-2025 00:00", taskWork: "Technical Entry", assigneeName: "Palak Shah", assignerName: "Ashish Soni", createdDate: "06-04-2025 11:48", deadline: "07-04-2025 12:00", status: "Under Process" },
+                { tenderId: 6932, tenderName: "Supply Of Rotary Switch For Cab Heater/ Cab Fan As...", clientName: "Northern Railway", location: "Punjab", dueDate: "03-04-2025 00:00", taskWork: "EMD & Submission", assigneeName: "Palak Shah", assignerName: "Tushar Sahayata", createdDate: "04-04-2025 17:05", deadline: "07-04-2025 12:00", status: "Under Process" },
+                { tenderId: 23400, tenderName: "Construction Of Drainage - Babughat - Luggage - Che...", clientName: "Border Road Organisation", location: "Assam", dueDate: "01-04-2025 00:00", taskWork: "EMD & Submission", assigneeName: "Palak Shah", assignerName: "Bharatur Bhartur", createdDate: "04-04-2025 16:51", deadline: "07-04-2025 13:00", status: "Under Process" },
+                { tenderId: 23400, tenderName: "Construction Of Panchayat Sankar Building - I (Hindi...", clientName: "Planning And Development Department", location: "Bihar", dueDate: "10-04-2025 00:00", taskWork: "Prepare Doc", assigneeName: "Palak Shah", assignerName: "Manoj Mitaliyar", createdDate: "04-04-2025 14:29", deadline: "04-04-2025 14:30", status: "Under Process" },
+                { tenderId: 6631, tenderName: "Supply Of Conical Rubber Thrust Pad For Axle Box T...", clientName: "North Western Railway", location: "Rajasthan", dueDate: "05-04-2025 00:00", taskWork: "Technical", assigneeName: "Palak Shah", assignerName: "Palak Shah", createdDate: "04-04-2025 13:56", deadline: "04-04-2025 15:00", status: "Under Process" },
+                { tenderId: 6131, tenderName: "Supply, Installation, Commissioning And Trial Oper...", clientName: "Public Health Engineering Department", location: "West Bengal", dueDate: "28-03-2025 00:00", taskWork: "MII", assigneeName: "Palak Shah", assignerName: "Palak Shah", createdDate: "28-03-2025 14:02", deadline: "31-03-2025 12:00", status: "Under Process" },
+                { tenderId: 493, tenderName: "Corrigendum - Pmps Of Auditorium For 50s Units Lo...", clientName: "Military Engineer Services", location: "Madhya Pradesh", dueDate: "31-03-2025 00:00", taskWork: "Technical", assigneeName: "Palak Shah", assignerName: "Palak Shah", createdDate: "25-03-2025 15:53", deadline: "26-03-2025 15:00", status: "Under Process" }
+              ]).map((task, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-sm font-medium text-blue-600">{task.tenderId}</td>
+                  <td className="px-4 py-3 text-sm">{task.tenderName}</td>
+                  <td className="px-4 py-3 text-sm">{task.clientName}</td>
+                  <td className="px-4 py-3 text-sm">{task.location}</td>
+                  <td className="px-4 py-3 text-sm">{task.dueDate}</td>
+                  <td className="px-4 py-3 text-sm">{task.taskWork}</td>
+                  <td className="px-4 py-3 text-sm">{task.assigneeName}</td>
+                  <td className="px-4 py-3 text-sm">{task.assignerName}</td>
+                  <td className="px-4 py-3 text-sm">{task.createdDate}</td>
+                  <td className="px-4 py-3 text-sm">{task.deadline}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                      {task.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex space-x-1">
+                      <button className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Show</span>
+            <select className="border border-gray-300 rounded px-2 py-1 text-sm">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+            </select>
+            <span className="text-sm text-gray-500">Page 1 of 2</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Prev</button>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderApprovalModule = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Approval Module</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-6">Approval's</h3>
+        
+        {/* Search Filter */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Search</h4>
+            <button className="text-blue-600 hover:text-blue-800">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+            <Download className="h-4 w-4 mr-2" />
+            Export To Excel
+          </button>
+        </div>
+
+        {/* Approval Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">TENDER ID</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">APPROVAL FOR</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">APPROVAL FROM</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">IN FLOW</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">REQUESTER</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">REQUEST DATE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ACTION DATE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DEADLINE DATE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">STATUS</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {approvalData.concat([
+                { tenderId: 25320, approvalFor: "Approval This Tender", approvalFrom: "Mitir Modi", inFlow: "Mitir Modi", requester: "Palak Shah", requestDate: "12-03-2025 11:37", actionDate: "13-03-2025 12:00", deadline: "13-03-2025 12:00", status: "Pending" },
+                { tenderId: 195, approvalFor: "Tendors Bidding", approvalFrom: "Yogesh Gadhavi", inFlow: "Yogesh Gadhvi", requester: "Palak Shah", requestDate: "18-03-2025 10:25", actionDate: "19-03-2025 12:00", deadline: "19-03-2025 12:00", status: "Pending" },
+                { tenderId: 17045, approvalFor: "Documents", approvalFrom: "Divyash Veramal", inFlow: "Divyash Veramal", requester: "Palak Shah", requestDate: "19-03-2025 09:48", actionDate: "20-03-2025 12:00", deadline: "20-03-2025 12:00", status: "Pending" },
+                { tenderId: 14011, approvalFor: "Documents", approvalFrom: "Palak Shah", inFlow: "Hitesh Modi", requester: "Palak Shah", requestDate: "24-03-2025 14:26", actionDate: "25-03-2025 12:00", deadline: "25-03-2025 12:00", status: "Pending" },
+                { tenderId: 5654, approvalFor: "Documents", approvalFrom: "Palak Shah", inFlow: "Hitesh Modi", requester: "Palak Shah", requestDate: "26-03-2025 17:15", actionDate: "27-03-2025 12:00", deadline: "27-03-2025 12:00", status: "Pending" },
+                { tenderId: 18505, approvalFor: "Documents", approvalFrom: "Palak Shah", inFlow: "Hitesh Modi", requester: "Palak Shah", requestDate: "29-03-2025 16:43", actionDate: "04-04-2025 12:00", deadline: "04-04-2025 12:00", status: "Pending" },
+                { tenderId: 8531, approvalFor: "Tender Bidding", approvalFrom: "Palak Shah", inFlow: "Binal Vasanwala", requester: "Palak Shah", requestDate: "04-04-2025 13:49", actionDate: "07-04-2025 12:00", deadline: "07-04-2025 12:00", status: "Pending" },
+                { tenderId: 48360, approvalFor: "EMD", approvalFrom: "Garvi Gadhavani", inFlow: "Anikita Saxena", requester: "Palak Shah", requestDate: "04-04-2025 16:52", actionDate: "05-04-2025 12:00", deadline: "05-04-2025 12:00", status: "Pending" },
+                { tenderId: 20782, approvalFor: "Bid Approval", approvalFrom: "Palak Shah", inFlow: "Anikita Saxena", requester: "Vaishali Patel", requestDate: "18-03-2025 18:07", actionDate: "19-03-2025 18:09", deadline: "20-03-2025 12:00", status: "Approved" }
+              ]).map((approval, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-sm font-medium text-blue-600">{approval.tenderId}</td>
+                  <td className="px-4 py-3 text-sm">{approval.approvalFor}</td>
+                  <td className="px-4 py-3 text-sm">{approval.approvalFrom}</td>
+                  <td className="px-4 py-3 text-sm">{approval.inFlow}</td>
+                  <td className="px-4 py-3 text-sm">{approval.requester}</td>
+                  <td className="px-4 py-3 text-sm">{approval.requestDate}</td>
+                  <td className="px-4 py-3 text-sm">{approval.actionDate}</td>
+                  <td className="px-4 py-3 text-sm">{approval.deadline}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      approval.status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {approval.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex space-x-1">
+                      <button className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Show</span>
+            <select className="border border-gray-300 rounded px-2 py-1 text-sm">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+            </select>
+            <span className="text-sm text-gray-500">Page 1 of 2</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Prev</button>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCompleteUserManagement = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">User Management</h2>
+        <div className="flex items-center space-x-4">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+            <Plus className="h-4 w-4 mr-2" />
+            Create User
+          </button>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Palak Shah</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-6">User Management</h3>
+        
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input 
+            type="text" 
+            placeholder="Search..."
+            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+          />
+        </div>
+
+        {/* User Management Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">LOGIN USER ID</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">EMAIL ID</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CONTACT NO</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DEPARTMENT</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DESIGNATION</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ROLE NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CREATED DATE & TIME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">STATUS</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {userData.concat([
+                { name: "Fatima Patel", loginUserId: "fatima@tender247.com", email: "fatima@tender247.com", contact: "9999999999", department: "Team - Finance", designation: "Finance Executive", roleName: "Finance MF", createdDate: "35-03-2025", status: "Active" },
+                { name: "Megha Patel", loginUserId: "megha@tender247.com", email: "megha@tender247.com", contact: "1111111111", department: "Tenderer Dept", designation: "Tender Executive-1", roleName: "Tender Bidding Filing", createdDate: "31-03-2025", status: "Active" },
+                { name: "Anikita Saxena", loginUserId: "anikita@tender247.com", email: "anikita@tender247.com", contact: "9723685300", department: "Anikita - Tender", designation: "Anikita - Tender - Executive", roleName: "Anikita - Tender - Bidding", createdDate: "27-03-2025", status: "Active" },
+                { name: "Hiral Trivedi", loginUserId: "hiral@tender247.com", email: "hiral@tender247.com", contact: "8018773719", department: "Sales Quoted-2", designation: "Admin - Tender - Exe", roleName: "Admin - Tender - Filing", createdDate: "22-03-2025", status: "Active" },
+                { name: "Tushar Sahayata", loginUserId: "tushar.sahayata@gmail.com", email: "tushar.sahayata@gmail.com", contact: "9510979431", department: "Sales Quoted-2", designation: "Sales Manager - Quoted-2", roleName: "TENDER BIDDING Qualified", createdDate: "22-03-2025", status: "Active" },
+                { name: "Uddhav Solanki", loginUserId: "uddhav@12gmail.com", email: "uddhav@12gmail.com", contact: "0000000000", department: "Tenderer Dept", designation: "Director", roleName: "Tenderer Management", createdDate: "05-03-2025", status: "Active" },
+                { name: "Divyamoni.n Rajput", loginUserId: "cypress@tender247.com", email: "cypress@tender247.com", contact: "9723685300", department: "CYPRESS - Tender", designation: "CYPRESS - Tender - Manager", roleName: "CYPRESS - Tender - Bidding", createdDate: "04-03-2025", status: "Active" }
+              ]).map((user, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-sm font-medium">{user.name}</td>
+                  <td className="px-4 py-3 text-sm">{user.loginUserId}</td>
+                  <td className="px-4 py-3 text-sm">{user.email}</td>
+                  <td className="px-4 py-3 text-sm">{user.contact}</td>
+                  <td className="px-4 py-3 text-sm">{user.department}</td>
+                  <td className="px-4 py-3 text-sm">{user.designation}</td>
+                  <td className="px-4 py-3 text-sm">{user.roleName}</td>
+                  <td className="px-4 py-3 text-sm">{user.createdDate}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                      {user.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex space-x-1">
+                      <button className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="View">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-green-600 hover:bg-green-50 rounded" title="Edit">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button className="p-1 text-purple-600 hover:bg-purple-50 rounded" title="Access">
+                        <User className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Show</span>
+            <select className="border border-gray-300 rounded px-2 py-1 text-sm">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+            </select>
+            <span className="text-sm text-gray-500">Page 1 of 10</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">First</button>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">1</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">2</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">3</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">4</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">5</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">6</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">7</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">8</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">9</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">10</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAddTender = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Add Tender Manually</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-6">New Tender</h3>
+        
+        {/* Search Existing Tender */}
+        <div className="mb-6">
+          <div className="flex space-x-2">
+            <input 
+              type="text" 
+              placeholder="Tender Id"
+              className="border border-gray-300 rounded-lg px-3 py-2 flex-1"
+            />
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              Search
+            </button>
+          </div>
+        </div>
+
+        {/* Create New Tender Form */}
+        <div className="border-t pt-6">
+          <h4 className="text-lg font-semibold mb-4">Create New Tender</h4>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Form */}
+            <div className="lg:col-span-2 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tender Brief *
+                </label>
+                <textarea 
+                  placeholder="Tender Brief"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-24"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Reference No. *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="Reference No."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Organization Name *
+                  </label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>Organization Name</option>
+                    <option>Eastern Railway</option>
+                    <option>Education Department</option>
+                    <option>Planning And Development Department</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Keyword *
+                  </label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>Search By Keywords</option>
+                    <option>Construction</option>
+                    <option>Supply</option>
+                    <option>Services</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Site Location *
+                  </label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>Site Location</option>
+                    <option>West Bengal</option>
+                    <option>Bihar</option>
+                    <option>Uttar Pradesh</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Profile*
+                  </label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option>Select profile</option>
+                    <option>Government</option>
+                    <option>Private</option>
+                    <option>PSU</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estimated Cost *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="Estimated Cost"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Earnest Money Deposits *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="Earnest Money Deposits"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Document Fees *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="Document Fees"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Submission Date *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="Submission Date"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tender Opening Date *
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="Tender Opening Date"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+
+              <div className="flex space-x-4">
+                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                  Submit
+                </button>
+                <button className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600">
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            {/* Document Upload Sidebar */}
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h5 className="font-semibold mb-3">Document</h5>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload File :
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                    <input type="file" className="hidden" id="file-upload" />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">Choose Files</p>
+                      <p className="text-xs text-gray-400">No file chosen</p>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    if (selectedTender) {
+      return renderTenderDetails();
+    }
+
+    switch(activeModule) {
+      case 'dashboard': return renderDashboard();
+      case 'finance-dashboard': return renderFinanceDashboard();
+      case 'tender-listing': return renderTenderListing();
+      case 'tender-results': return renderTenderResults();
+      case 'analytics': return renderCompetitorAnalysis();
+      case 'actual-tender': return renderActualTender();
+      case 'boq-search': return renderBOQSearch();
+      case 'prepare-response': return renderPrepareResponse();
+      case 'finance': return renderFinanceManagement();
+      case 'mis': return renderSalesMIS();
+      case 'documents': return renderDocumentManagement();
+      case 'tasks': return renderTaskManagement();
+      case 'approvals': return renderApprovalModule();
+      case 'users': return renderCompleteUserManagement();
+      case 'add-tender': return renderAddTender();
+      default: 
+        return (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {menuItems.find(item => item.id === activeModule)?.label}
+              </h3>
+              <p className="text-gray-500">This module is under development</p>
+              <div className="mt-4 space-y-2">
+                <button 
+                  onClick={() => setActiveModule('boq-search')}
+                  className="block mx-auto text-blue-600 hover:text-blue-800 underline"
+                >
+                  Search Item From BOQ
+                </button>
+                <button 
+                  onClick={() => setActiveModule('actual-tender')}
+                  className="block mx-auto text-blue-600 hover:text-blue-800 underline"
+                >
+                  Actual Tender
+                </button>
+                <button 
+                  onClick={() => setActiveModule('prepare-response')}
+                  className="block mx-auto text-blue-600 hover:text-blue-800 underline"
+                >
+                  Prepare Response
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+    }-y divide-gray-200">
+              {financeTransactions.map((transaction, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-sm">{transaction.id}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.organization}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.paymentDate}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.type}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.mode}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.amount.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.favour}</td>
+                  <td className="px-4 py-3 text-sm">{transaction.enteredBy}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      transaction.status === 'Paid' ? 'bg-green-100 text-green-800' :
+                      transaction.status === 'Refund' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {transaction.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Show</span>
+            <select className="border border-gray-300 rounded px-2 py-1 text-sm">
+              <option>10</option>
+              <option>25</option>
+              <option>50</option>
+            </select>
+            <span className="text-sm text-gray-500">Page 1 of 5</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">First</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">1</button>
+            <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">2</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">3</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">4</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">5</button>
+            <button className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSalesMIS = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Sales MIS</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold mb-6">Sales MIS</h3>
+        
+        {/* Search Filter */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Search</h4>
+            <button className="text-blue-600 hover:text-blue-800">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>User Name</option>
+              <option>Abc Zdc</option>
+              <option>Ashfaque Construction</option>
+              <option>Akash Kumar</option>
+            </select>
+          </div>
+
+          <div className="flex space-x-4">
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              Search
+            </button>
+            <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Export Button */}
+        <div className="flex justify-end mb-4">
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+            <Download className="h-4 w-4 mr-2" />
+            Export To Excel
+          </button>
+        </div>
+
+        {/* Sales MIS Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">SR</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">USER NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ASSIGNED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">IN PROCESS</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">SUBMITTED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CANCELLED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">AWARDED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">LOST</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">REJECTED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DROPPED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">REOPENED</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">TOTAL TENDER</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {salesMISData.concat([
+                { userName: "Anil Bharuchwal", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Amit - Mishra", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Amit Mishra", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Amit Mishra", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Amit Mishra", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Amit Mishra", assigned: 3, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 3 },
+                { userName: "Amit - Pritam Mishra", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Anika Swami", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Anika Swami", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Ankita Varmani", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Archit Gupta", assigned: 0, inProcess: 2, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 2 },
+                { userName: "Arti Shukla", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Ashish S", assigned: 0, inProcess: 9, submitted: 2, cancelled: 0, awarded: 1, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 6 },
+                { userName: "Asman Soni", assigned: 2, inProcess: 1, submitted: 1, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 2 },
+                { userName: "Ashrash Soni", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Bharatur Bhartur", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Binal 2 Vasanwala", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 },
+                { userName: "Binal Vasanwala", assigned: 0, inProcess: 0, submitted: 0, cancelled: 0, awarded: 0, lost: 0, rejected: 0, dropped: 0, reopened: 0, totalTender: 0 }
+              ]).map((user, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="px-4 py-3 text-sm">{index + 1}</td>
+                  <td className="px-4 py-3 text-sm">{user.userName}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.assigned}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.inProcess}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.submitted}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.cancelled}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.awarded}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.lost}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.rejected}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.dropped}</td>
+                  <td className="px-4 py-3 text-sm text-center">{user.reopened}</td>
+                  <td className="px-4 py-3 text-sm text-center font-medium">{user.totalTender}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDocumentManagement = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Document Management for Response Preparation</h2>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Palak Shah</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold">Document Brief Case</h3>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+            <Plus className="h-4 w-4 mr-2" />
+            New File
+          </button>
+        </div>
+        
+        {/* Document Filter */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold">Document Brief Filter</h4>
+            <button className="text-blue-600 hover:text-blue-800">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Folder Name</option>
+              <option>04-04-2024</option>
+              <option>Company General Documents</option>
+              <option>Vishalo_323469</option>
+            </select>
+            <select className="border border-gray-300 rounded-lg px-3 py-2">
+              <option>Sub Folder Name</option>
+            </select>
+            <input 
+              type="text" 
+              placeholder="File Name"
+              className="border border-gray-300 rounded-lg px-3 py-2"
+            />
+          </div>
+
+          <div className="flex items-center space-x-4 mb-4">
+            <label className="flex items-center space-x-2">
+              <input type="checkbox" className="rounded" />
+              <span className="text-sm">Show Deleted File</span>
+            </label>
+          </div>
+
+          <div className="flex space-x-4">
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              Search
+            </button>
+            <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Document Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">SR</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">FOLDER NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">SUB FOLDER NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">FILE NAME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CREATED BY</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">CREATED DATE & TIME</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">EXPIRY DATE</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">REMARKS</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide

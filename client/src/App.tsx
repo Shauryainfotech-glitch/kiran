@@ -12,6 +12,8 @@ import Calendar from "@/pages/calendar";
 import Vendors from "@/pages/vendors";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import FinanceDashboard from "@/pages/finance-dashboard";
+import TaskManagement from "@/pages/task-management";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -34,10 +36,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/finance-dashboard" component={FinanceDashboard} />
       <Route path="/tenders" component={Tenders} />
       <Route path="/calendar" component={Calendar} />
       <Route path="/vendors" component={Vendors} />
       <Route path="/reports" component={Reports} />
+      <Route path="/tasks" component={TaskManagement} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
