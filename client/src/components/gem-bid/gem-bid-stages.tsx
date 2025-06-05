@@ -37,7 +37,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
-// GeM Bid Lifecycle Stages based on CSV data
+// GeM Bid Lifecycle Stages based on detailed CSV data with comprehensive fields and verification
 const GEM_BID_STAGES = [
   {
     stageNumber: 1,
@@ -49,6 +49,11 @@ const GEM_BID_STAGES = [
       "Relevant category selected?", 
       "Active bids only?"
     ],
+    verification: [
+      "Filters saved?",
+      "Relevant category selected?",
+      "Active bids only?"
+    ],
     gemPortalSection: "GeM > Bids > Search"
   },
   {
@@ -57,6 +62,11 @@ const GEM_BID_STAGES = [
     description: "Analyze bid requirements and criteria",
     importantFields: ["Bid No.", "Bid Type", "BoQ File", "Eligibility Criteria", "EMD", "Delivery Terms", "Consignee Details"],
     checklist: [
+      "Custom/BoQ format verified?",
+      "Technical criteria matched?",
+      "MSME exemption applicable?"
+    ],
+    verification: [
       "Custom/BoQ format verified?",
       "Technical criteria matched?",
       "MSME exemption applicable?"
@@ -73,6 +83,11 @@ const GEM_BID_STAGES = [
       "Question clear and relevant?",
       "Supporting doc attached?"
     ],
+    verification: [
+      "Q&A window open?",
+      "Question clear and relevant?",
+      "Supporting doc attached?"
+    ],
     gemPortalSection: "Bid > Q&A Tab"
   },
   {
@@ -85,20 +100,183 @@ const GEM_BID_STAGES = [
       "Authorization updated?",
       "File size as per limit?"
     ],
+    verification: [
+      "All docs in PDF?",
+      "Authorization updated?",
+      "File size as per limit?"
+    ],
     gemPortalSection: "Offline"
   },
   {
     stageNumber: 5,
     stageName: "Technical Bid Submission",
-    description: "Submit technical bid with specifications",
+    description: "Submit technical compliance documents",
     importantFields: ["BoQ Compliance", "Specification Match", "Uploads", "Terms Acceptance", "DSC"],
     checklist: [
       "All fields filled?",
       "Terms accepted?",
       "DSC working?"
     ],
-    gemPortalSection: "Bid > Participate > Technical"
+    verification: [
+      "All fields filled?",
+      "Terms accepted?",
+      "DSC working?"
+    ],
+    gemPortalSection: "Technical Bid Submission"
   },
+  {
+    stageNumber: 6,
+    stageName: "Financial Bid Submission",
+    description: "Submit pricing and financial details",
+    importantFields: ["Unit Price", "GST", "Total Price Breakup"],
+    checklist: [
+      "GST shown separately?",
+      "Correct BoQ format?",
+      "All documents filled?"
+    ],
+    verification: [
+      "GST shown separately?",
+      "Correct BoQ format?", 
+      "All documents filled?"
+    ],
+    gemPortalSection: "Financial Bid Submission"
+  },
+  {
+    stageNumber: 7,
+    stageName: "Technical Evaluation (by Buyer)",
+    description: "Buyer evaluates technical compliance",
+    importantFields: ["Evaluation Status", "Clarification Request", "Response Time"],
+    checklist: [
+      "Clarifications answered?",
+      "System time correct?",
+      "Token reference available?"
+    ],
+    verification: [
+      "Clarifications answered?",
+      "System time correct?",
+      "Token reference available?"
+    ],
+    gemPortalSection: "Evaluation Tab"
+  },
+  {
+    stageNumber: 8,
+    stageName: "Reverse Auction",
+    description: "Participate in dynamic pricing",
+    importantFields: ["Bid Window Time", "Start Time", "Price Movement Range"],
+    checklist: [
+      "Accepted within 10 days?",
+      "Terms agreed?",
+      "Delivery as per specs?"
+    ],
+    verification: [
+      "Accepted within 10 days?",
+      "Terms agreed?",
+      "Delivery as per specs?"
+    ],
+    gemPortalSection: "RA Window"
+  },
+  {
+    stageNumber: 9,
+    stageName: "PO Acceptance",
+    description: "Accept purchase order terms",
+    importantFields: ["PO No.", "Acceptance Click", "Commitment Date", "Acknowledgment Upload"],
+    checklist: [
+      "Accepted within 10 days?",
+      "Terms agreed?",
+      "Delivery confirmed?"
+    ],
+    verification: [
+      "Accepted within 10 days?",
+      "Terms agreed?",
+      "Delivery confirmed?"
+    ],
+    gemPortalSection: "PO Management"
+  },
+  {
+    stageNumber: 10,
+    stageName: "Dispatch & Delivery",
+    description: "Ship and deliver goods",
+    importantFields: ["Delivery Details", "GRN", "Transport Info", "Photo Upload"],
+    checklist: [
+      "All items as per specs?",
+      "Delivered on time?",
+      "Partial/Full rejection managed?"
+    ],
+    verification: [
+      "All items as per specs?",
+      "Delivered on time?",
+      "Partial/Full rejection managed?"
+    ],
+    gemPortalSection: "Delivery Management"
+  },
+  {
+    stageNumber: 11,
+    stageName: "Inspection by Consignee",
+    description: "Quality check and acceptance",
+    importantFields: ["Status: Accept/Reject/Returned", "Comments"],
+    checklist: [
+      "Partial/Full rejection managed?",
+      "Response submitted?",
+      "GSTIN match?"
+    ],
+    verification: [
+      "Partial/Full rejection managed?",
+      "Response submitted?",
+      "GSTIN match?"
+    ],
+    gemPortalSection: "Inspection Tab"
+  },
+  {
+    stageNumber: 12,
+    stageName: "Invoice Upload",
+    description: "Submit invoice for payment",
+    importantFields: ["Invoice No.", "Tax Details", "PDF"],
+    checklist: [
+      "PO No. correct?",
+      "Delay >30 days?",
+      "PFMS error tracked?"
+    ],
+    verification: [
+      "PO No. correct?",
+      "Delay >30 days?",
+      "PFMS error tracked?"
+    ],
+    gemPortalSection: "Invoice Management"
+  },
+  {
+    stageNumber: 13,
+    stageName: "Payment Tracking",
+    description: "Monitor payment status",
+    importantFields: ["Payment Status", "UTR No.", "Payment Date"],
+    checklist: [
+      "Delay >30 days?",
+      "PFMS error tracked?",
+      "Rating starts?"
+    ],
+    verification: [
+      "Delay >30 days?",
+      "PFMS error tracked?",
+      "Rating starts?"
+    ],
+    gemPortalSection: "Payment Tracking"
+  },
+  {
+    stageNumber: 14,
+    stageName: "Feedback & Performance",
+    description: "Complete performance evaluation",
+    importantFields: ["Rating", "Comments", "Feedback"],
+    checklist: [
+      "Rating starts?",
+      "Feedback submitted?",
+      "Process completed?"
+    ],
+    verification: [
+      "Rating starts?",
+      "Feedback submitted?",
+      "Process completed?"
+    ],
+    gemPortalSection: "Performance Management"
+  }
   {
     stageNumber: 6,
     stageName: "Financial Bid Submission",
