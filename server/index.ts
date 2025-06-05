@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { initializeWebSocket } from "./websocket";
+// import { initializeWebSocket } from "./websocket";
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -64,12 +64,5 @@ app.use((req, res, next) => {
   
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
-    // Initialize WebSocket server after server is listening
-    try {
-      const wsManager = initializeWebSocket(server);
-      log(`WebSocket server ready for real-time communications`);
-    } catch (error) {
-      log(`WebSocket initialization skipped: ${error.message}`);
-    }
   });
 })();
