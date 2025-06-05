@@ -418,7 +418,7 @@ export default function DocumentIntegrations() {
                   <CardHeader>
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-muted rounded-lg">
-                        <Icon className="h-6 w-6" />
+                        {Icon && <Icon className="h-6 w-6" />}
                       </div>
                       <div>
                         <CardTitle>Configure {integration.name}</CardTitle>
