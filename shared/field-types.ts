@@ -412,7 +412,7 @@ export const GEM_BID_FIELD_CONFIGS: Record<string, FieldConfiguration> = {
 };
 
 // Field categories for organization
-export const FIELD_CATEGORIES = {
+export const FIELD_CATEGORIES: { [key: string]: string } = {
   basic: 'Basic Information',
   documents: 'Documents',
   requirements: 'Requirements',
