@@ -223,12 +223,12 @@ export default function FirmDocuments() {
                 />
               </div>
             </div>
-            <Select value={selectedFirm?.toString() || ""} onValueChange={(value) => setSelectedFirm(value ? parseInt(value) : null)}>
+            <Select value={selectedFirm?.toString() || "all"} onValueChange={(value) => setSelectedFirm(value === "all" ? null : parseInt(value))}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filter by firm" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Firms</SelectItem>
+                <SelectItem value="all">All Firms</SelectItem>
                 {firms.map((firm: Firm) => (
                   <SelectItem key={firm.id} value={firm.id.toString()}>
                     {firm.name}
@@ -236,12 +236,12 @@ export default function FirmDocuments() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedCategory?.toString() || ""} onValueChange={(value) => setSelectedCategory(value ? parseInt(value) : null)}>
+            <Select value={selectedCategory?.toString() || "all"} onValueChange={(value) => setSelectedCategory(value === "all" ? null : parseInt(value))}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category: DocumentCategory) => (
                   <SelectItem key={category.id} value={category.id.toString()}>
                     {category.name}
