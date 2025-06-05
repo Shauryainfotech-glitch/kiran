@@ -134,6 +134,8 @@ export class MemStorage implements IStorage {
     this.currentFirmId = 1;
     this.currentDocumentCategoryId = 1;
     this.currentFirmDocumentId = 1;
+    this.gemBids = new Map();
+    this.currentGemBidId = 1;
 
     // Create default admin user with sample data
     this.createUser({
@@ -590,6 +592,50 @@ export class MemStorage implements IStorage {
 
   async deleteFirmDocument(id: number): Promise<boolean> {
     return this.firmDocuments.delete(id);
+  }
+
+  // GEM Bid operations
+  async getGemBids(): Promise<GemBid[]> {
+    return Array.from(this.gemBids.values());
+  }
+
+  async getGemBid(id: number): Promise<GemBid | undefined> {
+    return this.gemBids.get(id);
+  }
+
+  async createGemBid(insertGemBid: InsertGemBid): Promise<GemBid> {
+    const gemBid: GemBid = {
+      id: this.currentGemBidId++,
+      ...insertGemBid,
+      submissionCount: 0,
+      createdAt: new Date().toISOString()
+    };
+    this.gemBids.set(gemBid.id, gemBid);
+    return gemBid;
+  }
+
+  async updateGemBid(id: number, updates: Partial<InsertGemBid>): Promise<GemBid | undefined> {
+    const gemBid = this.gemBids.get(id);
+    if (!gemBid) return undefined;
+
+    const updatedGemBid: GemBid = {
+      ...gemBid,
+      ...updates
+    };
+    this.gemBids.set(id, updatedGemBid);
+    return updatedGemBid;
+  }
+
+  async deleteGemBid(id: number): Promise<boolean> {
+    return this.gemBids.delete(id);
+  }
+
+  async getGemBidsByCategory(category: string): Promise<GemBid[]> {
+    return Array.from(this.gemBids.values()).filter(bid => bid.category === category);
+  }
+
+  async getGemBidsByStatus(status: string): Promise<GemBid[]> {
+    return Array.from(this.gemBids.values()).filter(bid => bid.status === status);
   }
 }
 
