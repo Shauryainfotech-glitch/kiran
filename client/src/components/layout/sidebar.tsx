@@ -6,17 +6,22 @@ import {
   Building, 
   FileText, 
   Settings, 
-  File 
+  File,
+  Brain,
+  Shield,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { href: "/", label: "Sales Dashboard", icon: BarChart3 },
+  { href: "/ai-suite", label: "TenderAI Pro Suite", icon: Brain },
+  { href: "/blockchain", label: "Blockchain Verification", icon: Shield },
   { href: "/finance-dashboard", label: "Finance Dashboard", icon: File },
-  { href: "/tenders", label: "Tender Listing", icon: FolderOpen },
+  { href: "/tenders", label: "Smart Tenders", icon: FolderOpen },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/vendors", label: "Vendor Management", icon: Building },
-  { href: "/tasks", label: "Task Management", icon: Calendar },
+  { href: "/tasks", label: "Task Management", icon: Users },
   { href: "/reports", label: "Reports & Analytics", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

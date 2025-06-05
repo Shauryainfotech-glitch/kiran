@@ -14,6 +14,8 @@ import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import FinanceDashboard from "@/pages/finance-dashboard";
 import TaskManagement from "@/pages/task-management";
+import AISuite from "@/pages/ai-suite";
+import BlockchainVerification from "@/pages/blockchain-verification";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -36,6 +38,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/ai-suite" component={AISuite} />
+      <Route path="/blockchain" component={BlockchainVerification} />
       <Route path="/finance-dashboard" component={FinanceDashboard} />
       <Route path="/tenders" component={Tenders} />
       <Route path="/calendar" component={Calendar} />
