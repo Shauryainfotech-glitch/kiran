@@ -7,7 +7,8 @@ import {
   insertSubmissionSchema, 
   insertFirmSchema,
   insertDocumentCategorySchema,
-  insertFirmDocumentSchema
+  insertFirmDocumentSchema,
+  insertGemBidSchema
 } from "@shared/schema";
 import { z } from "zod";
 import * as claude from "./claude";
@@ -886,6 +887,88 @@ File type: ${req.file.mimetype}`;
       res.json(metrics);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to get AI metrics", error: error.message });
+    }
+  });
+
+  // Gem Bids routes
+  app.get("/api/gem-bids", async (req, res) => {
+    try {
+      const { category, status } = req.query;
+      let gemBids;
+      
+      if (category) {
+        gemBids = await storage.getGemBidsByCategory(category as string);
+      } else if (status) {
+        gemBids = await storage.getGemBidsByStatus(status as string);
+      } else {
+        gemBids = await storage.getGemBids();
+      }
+      
+      res.json(gemBids);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gem bids" });
+    }
+  });
+
+  app.get("/api/gem-bids/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const gemBid = await storage.getGemBid(id);
+      
+      if (!gemBid) {
+        return res.status(404).json({ message: "Gem bid not found" });
+      }
+      
+      res.json(gemBid);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gem bid" });
+    }
+  });
+
+  app.post("/api/gem-bids", async (req, res) => {
+    try {
+      const data = insertGemBidSchema.parse(req.body);
+      const gemBid = await storage.createGemBid(data);
+      res.status(201).json(gemBid);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid gem bid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create gem bid" });
+    }
+  });
+
+  app.put("/api/gem-bids/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertGemBidSchema.partial().parse(req.body);
+      const gemBid = await storage.updateGemBid(id, data);
+      
+      if (!gemBid) {
+        return res.status(404).json({ message: "Gem bid not found" });
+      }
+      
+      res.json(gemBid);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid gem bid data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update gem bid" });
+    }
+  });
+
+  app.delete("/api/gem-bids/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteGemBid(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Gem bid not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete gem bid" });
     }
   });
 
