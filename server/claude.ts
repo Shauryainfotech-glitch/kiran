@@ -151,7 +151,7 @@ export async function generateTenderResponse(tenderRequirements: string, company
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      system: `You are a tender response specialist for the TENDER247 platform. Generate comprehensive tender responses in JSON format with keys: "proposal", "technicalApproach", "timeline", "teamStructure", "qualityAssurance", "valueProposition".`,
+      system: `You are a tender response specialist for the AVGC TENDER PRO platform. Generate comprehensive tender responses in JSON format with keys: "proposal", "technicalApproach", "timeline", "teamStructure", "qualityAssurance", "valueProposition".`,
       max_tokens: 2048,
       messages: [
         { 
@@ -195,7 +195,7 @@ export async function checkCompliance(documentContent: string, regulations: stri
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      system: `You are a compliance expert for the TENDER247 platform. Check document compliance against regulations and provide assessment in JSON format with keys: "isCompliant" (boolean), "complianceScore" (0-100), "violations" (array), "recommendations" (array), "requiredActions" (array).`,
+      system: `You are a compliance expert for the AVGC TENDER PRO platform. Check document compliance against regulations and provide assessment in JSON format with keys: "isCompliant" (boolean), "complianceScore" (0-100), "violations" (array), "recommendations" (array), "requiredActions" (array).`,
       max_tokens: 1024,
       messages: [
         { 
