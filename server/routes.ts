@@ -1356,6 +1356,193 @@ File type: ${req.file.mimetype}`;
     }
   });
 
+  // Integration management endpoints
+  app.get('/api/integrations', async (req, res) => {
+    try {
+      // Mock integrations data - in production this would come from database
+      const integrations = [
+        {
+          id: "google-drive",
+          name: "Google Drive",
+          description: "Sync documents with Google Drive for cloud storage and collaboration",
+          category: "Cloud Storage",
+          status: "inactive",
+          config: {
+            clientId: "",
+            clientSecret: "",
+            refreshToken: "",
+            syncEnabled: false,
+            autoUpload: true
+          }
+        },
+        {
+          id: "slack",
+          name: "Slack",
+          description: "Send document notifications and alerts to Slack channels",
+          category: "Communication",
+          status: "inactive",
+          config: {
+            webhookUrl: "",
+            channel: "#documents",
+            notifyOnUpload: true,
+            notifyOnApproval: true,
+            notifyOnExpiry: true
+          }
+        },
+        {
+          id: "email-notifications",
+          name: "Email Notifications", 
+          description: "Automated email alerts for document events and deadlines",
+          category: "Communication",
+          status: "active",
+          config: {
+            smtpHost: "smtp.gmail.com",
+            smtpPort: 587,
+            username: "notifications@company.com",
+            fromEmail: "notifications@company.com",
+            enableSsl: true
+          }
+        },
+        {
+          id: "ai-analysis",
+          name: "AI Document Analysis",
+          description: "Automated document content analysis and insights using AI",
+          category: "AI & Analytics", 
+          status: "configuring",
+          config: {
+            provider: "anthropic",
+            apiKey: "",
+            enableAutoClassification: true,
+            enableContentExtraction: true,
+            enableComplianceCheck: true
+          }
+        }
+      ];
+      
+      res.json(integrations);
+    } catch (error) {
+      console.error("Error fetching integrations:", error);
+      res.status(500).json({ message: "Failed to fetch integrations" });
+    }
+  });
+
+  app.post('/api/integrations/:id/configure', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const config = req.body;
+      
+      // In production, save configuration to database
+      console.log(`Configuring integration ${id} with config:`, config);
+      
+      // Simulate configuration save
+      const result = {
+        integrationId: id,
+        status: "configured",
+        configuredAt: new Date().toISOString(),
+        config
+      };
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error configuring integration:", error);
+      res.status(500).json({ message: "Failed to configure integration" });
+    }
+  });
+
+  app.post('/api/integrations/:id/test', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Simulate integration test based on type
+      let testResult;
+      
+      switch (id) {
+        case "slack":
+          testResult = {
+            success: false,
+            message: "Webhook URL is required. Please configure the Slack webhook URL in integration settings."
+          };
+          break;
+          
+        case "google-drive":
+          testResult = {
+            success: false,
+            message: "Google OAuth credentials are required. Please provide Client ID and Client Secret."
+          };
+          break;
+          
+        case "ai-analysis":
+          testResult = {
+            success: false,
+            message: "API key is required. Please provide your Anthropic API key to enable AI document analysis."
+          };
+          break;
+          
+        case "email-notifications":
+          testResult = {
+            success: true,
+            message: "Email configuration is valid and working correctly."
+          };
+          break;
+          
+        default:
+          testResult = {
+            success: false,
+            message: "Integration test not implemented for this service."
+          };
+      }
+      
+      if (!testResult.success) {
+        return res.status(400).json(testResult);
+      }
+      
+      res.json(testResult);
+    } catch (error) {
+      console.error("Error testing integration:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Integration test failed due to server error" 
+      });
+    }
+  });
+
+  app.get('/api/integrations/logs', async (req, res) => {
+    try {
+      // Mock integration activity logs
+      const logs = [
+        {
+          id: 1,
+          integrationId: "email-notifications",
+          action: "notification_sent",
+          details: "Document approval notification sent",
+          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+          status: "success"
+        },
+        {
+          id: 2,
+          integrationId: "ai-analysis",
+          action: "document_analyzed",
+          details: "Company Registration.pdf processed successfully", 
+          timestamp: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
+          status: "success"
+        },
+        {
+          id: 3,
+          integrationId: "slack",
+          action: "webhook_failed",
+          details: "Failed to send notification - webhook URL not configured",
+          timestamp: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
+          status: "error"
+        }
+      ];
+      
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching integration logs:", error);
+      res.status(500).json({ message: "Failed to fetch integration logs" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

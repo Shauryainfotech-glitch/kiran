@@ -25,6 +25,7 @@ import SalesDashboard from "@/pages/sales-dashboard";
 import FirmDocuments from "@/pages/firm-documents";
 import DocumentAnalytics from "@/pages/document-analytics";
 import BulkOperations from "@/pages/bulk-operations";
+import DocumentIntegrations from "@/pages/document-integrations";
 import NotFound from "@/pages/not-found";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/firm-documents" component={FirmDocuments} />
       <Route path="/document-analytics" component={DocumentAnalytics} />
       <Route path="/bulk-operations" component={BulkOperations} />
+      <Route path="/document-integrations" component={DocumentIntegrations} />
       <Route path="/task" component={TaskManagement} />
       <Route path="/approvals" component={NotFound} />
       <Route path="/settings" component={Settings} />
