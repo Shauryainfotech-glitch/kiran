@@ -62,6 +62,7 @@ function Router() {
       <Route path="/document-analytics" component={DocumentAnalytics} />
       <Route path="/bulk-operations" component={BulkOperations} />
       <Route path="/document-integrations" component={DocumentIntegrations} />
+      <Route path="/document-workflows" component={DocumentWorkflows} />
       <Route path="/task" component={TaskManagement} />
       <Route path="/approvals" component={NotFound} />
       <Route path="/settings" component={Settings} />
